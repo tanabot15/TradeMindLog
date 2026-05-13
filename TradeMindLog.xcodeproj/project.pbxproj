@@ -6,17 +6,34 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		D9BBBAA32FB4A26600E05A0C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D9BBBA9F2FB4A26600E05A0C /* Assets.xcassets */; };
+		D9BBBAA42FB4A26600E05A0C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9BBBAA02FB4A26600E05A0C /* ContentView.swift */; };
+		D9BBBAA52FB4A26600E05A0C /* TradeMindLogApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9BBBAA12FB4A26600E05A0C /* TradeMindLogApp.swift */; };
+		D9BBBAA92FB4A3E200E05A0C /* Record.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9BBBAA82FB4A3E200E05A0C /* Record.swift */; };
+		D9BBBAAB2FB4A41600E05A0C /* SampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9BBBAAA2FB4A41600E05A0C /* SampleData.swift */; };
+		D9BBBAAD2FB4A42D00E05A0C /* PreviewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9BBBAAC2FB4A42D00E05A0C /* PreviewContainer.swift */; };
+		D9BBBAAF2FB4A47700E05A0C /* ListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9BBBAAE2FB4A47700E05A0C /* ListView.swift */; };
+		D9BBBAB12FB4A48700E05A0C /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9BBBAB02FB4A48700E05A0C /* CalendarView.swift */; };
+		D9BBBAB32FB4A49E00E05A0C /* AddRecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9BBBAB22FB4A49E00E05A0C /* AddRecordView.swift */; };
+		D9BBBAB52FB4A4A900E05A0C /* AnalysisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9BBBAB42FB4A4A900E05A0C /* AnalysisView.swift */; };
+		D9BBBAB72FB4A4B700E05A0C /* SettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9BBBAB62FB4A4B700E05A0C /* SettingView.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		D9BBBA912FB4A25400E05A0C /* TradeMindLog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TradeMindLog.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D9BBBA9F2FB4A26600E05A0C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D9BBBAA02FB4A26600E05A0C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		D9BBBAA12FB4A26600E05A0C /* TradeMindLogApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradeMindLogApp.swift; sourceTree = "<group>"; };
+		D9BBBAA82FB4A3E200E05A0C /* Record.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Record.swift; sourceTree = "<group>"; };
+		D9BBBAAA2FB4A41600E05A0C /* SampleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleData.swift; sourceTree = "<group>"; };
+		D9BBBAAC2FB4A42D00E05A0C /* PreviewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewContainer.swift; sourceTree = "<group>"; };
+		D9BBBAAE2FB4A47700E05A0C /* ListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListView.swift; sourceTree = "<group>"; };
+		D9BBBAB02FB4A48700E05A0C /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
+		D9BBBAB22FB4A49E00E05A0C /* AddRecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddRecordView.swift; sourceTree = "<group>"; };
+		D9BBBAB42FB4A4A900E05A0C /* AnalysisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalysisView.swift; sourceTree = "<group>"; };
+		D9BBBAB62FB4A4B700E05A0C /* SettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
-
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		D9BBBA932FB4A25400E05A0C /* TradeMindLog */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = TradeMindLog;
-			sourceTree = "<group>";
-		};
-/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		D9BBBA8E2FB4A25400E05A0C /* Frameworks */ = {
@@ -32,7 +49,7 @@
 		D9BBBA882FB4A25400E05A0C = {
 			isa = PBXGroup;
 			children = (
-				D9BBBA932FB4A25400E05A0C /* TradeMindLog */,
+				D9BBBAA22FB4A26600E05A0C /* TradeMindLog */,
 				D9BBBA922FB4A25400E05A0C /* Products */,
 			);
 			sourceTree = "<group>";
@@ -43,6 +60,40 @@
 				D9BBBA912FB4A25400E05A0C /* TradeMindLog.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		D9BBBAA22FB4A26600E05A0C /* TradeMindLog */ = {
+			isa = PBXGroup;
+			children = (
+				D9BBBAA12FB4A26600E05A0C /* TradeMindLogApp.swift */,
+				D9BBBAA62FB4A3B800E05A0C /* Model */,
+				D9BBBAA72FB4A3C400E05A0C /* View */,
+				D9BBBA9F2FB4A26600E05A0C /* Assets.xcassets */,
+			);
+			path = TradeMindLog;
+			sourceTree = "<group>";
+		};
+		D9BBBAA62FB4A3B800E05A0C /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				D9BBBAA82FB4A3E200E05A0C /* Record.swift */,
+				D9BBBAAA2FB4A41600E05A0C /* SampleData.swift */,
+				D9BBBAAC2FB4A42D00E05A0C /* PreviewContainer.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		D9BBBAA72FB4A3C400E05A0C /* View */ = {
+			isa = PBXGroup;
+			children = (
+				D9BBBAA02FB4A26600E05A0C /* ContentView.swift */,
+				D9BBBAAE2FB4A47700E05A0C /* ListView.swift */,
+				D9BBBAB02FB4A48700E05A0C /* CalendarView.swift */,
+				D9BBBAB22FB4A49E00E05A0C /* AddRecordView.swift */,
+				D9BBBAB42FB4A4A900E05A0C /* AnalysisView.swift */,
+				D9BBBAB62FB4A4B700E05A0C /* SettingView.swift */,
+			);
+			path = View;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -59,9 +110,6 @@
 			buildRules = (
 			);
 			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				D9BBBA932FB4A25400E05A0C /* TradeMindLog */,
 			);
 			name = TradeMindLog;
 			packageProductDependencies = (
@@ -109,6 +157,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D9BBBAA32FB4A26600E05A0C /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -119,6 +168,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D9BBBAA42FB4A26600E05A0C /* ContentView.swift in Sources */,
+				D9BBBAB72FB4A4B700E05A0C /* SettingView.swift in Sources */,
+				D9BBBAB32FB4A49E00E05A0C /* AddRecordView.swift in Sources */,
+				D9BBBAB12FB4A48700E05A0C /* CalendarView.swift in Sources */,
+				D9BBBAA52FB4A26600E05A0C /* TradeMindLogApp.swift in Sources */,
+				D9BBBAAF2FB4A47700E05A0C /* ListView.swift in Sources */,
+				D9BBBAA92FB4A3E200E05A0C /* Record.swift in Sources */,
+				D9BBBAAB2FB4A41600E05A0C /* SampleData.swift in Sources */,
+				D9BBBAB52FB4A4A900E05A0C /* AnalysisView.swift in Sources */,
+				D9BBBAAD2FB4A42D00E05A0C /* PreviewContainer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -256,11 +315,13 @@
 				DEVELOPMENT_TEAM = D86GFNUD35;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -269,12 +330,16 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.suzuki.kenichiro.TradeMindLog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -288,11 +353,13 @@
 				DEVELOPMENT_TEAM = D86GFNUD35;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -301,12 +368,16 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.suzuki.kenichiro.TradeMindLog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
