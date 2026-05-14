@@ -54,12 +54,12 @@ struct ListView: View {
                             }
                         }
                     }
-                    .listRowBackground(selectedSituation == "購入" ? Color.blue.opacity(0.1) : Color.red.opacity(0.1))
+                    .listRowBackground(selectedSituation == "購入" ? Color.blue.opacity(0.15) : Color.red.opacity(0.15))
                 }
                 .onDelete(perform: deleteRecords)
             }
             .scrollContentBackground(.hidden)
-            .background(Color.white)
+            .background(Color(.systemGroupedBackground))
             .navigationTitle("Records")
             .toolbar {
                 Button("Add Record", systemImage: "plus") {
@@ -103,4 +103,5 @@ struct ListView: View {
 #Preview {
     ListView()
         .modelContainer(previewContainer)
+//        .preferredColorScheme(.dark)
 }

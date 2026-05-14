@@ -148,4 +148,5 @@ struct AddRecordView: View {
     
     return AddRecordView(record: testRecord, isNew: false)
         .modelContainer(container)
+//        .preferredColorScheme(.dark)
 }

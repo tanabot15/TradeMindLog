@@ -128,4 +128,5 @@ struct AnalysisView: View {
 #Preview {
     AnalysisView()
         .modelContainer(previewContainer)
+//        .preferredColorScheme(.dark)
 }

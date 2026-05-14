@@ -44,7 +44,7 @@ struct CalendarView: View {
                     }
                 }
                 .scrollContentBackground(.hidden)
-                .background(Color.white)
+                .background(Color(.systemBackground))
                 
                 Spacer()
             }
@@ -91,7 +91,7 @@ struct CalendarView: View {
                         }
                         .padding(.vertical, 2)
                     }
-                    .listRowBackground(color.opacity(0.1))
+                    .listRowBackground(color.opacity(0.15))
                 }
                 .onDelete(perform: { offsets in deleteSpecificRecords(at: offsets, from: records) })
             }
@@ -111,6 +111,8 @@ struct CalendarView: View {
         
         func makeUIView(context: Context) -> UICalendarView {
             let calendarView = UICalendarView()
+            calendarView.backgroundColor = .clear
+            
             calendarView.calendar = Calendar(identifier: .gregorian)
             calendarView.locale = .current
             calendarView.fontDesign = .rounded
@@ -212,4 +214,5 @@ struct CalendarView: View {
 #Preview {
     CalendarView()
         .modelContainer(previewContainer)
+//        .preferredColorScheme(.dark)
 }

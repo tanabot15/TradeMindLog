@@ -38,4 +38,5 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .modelContainer(previewContainer)
+//        .preferredColorScheme(.dark)
 }

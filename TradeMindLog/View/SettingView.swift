@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct SettingView: View {
+    @AppStorage("colorScheme") var colorScheme = 0
     // @AppStorage("isMondayStart") private var isMondayStart = false
     
     // Tanabot Menbership URL
@@ -26,11 +27,20 @@ struct SettingView: View {
                     }
                 }
                 
-                Section(header: Text("This App")) {
+                Section(header: Text("画面")) {
+                    Picker("外観モード", selection: $colorScheme) {
+                        Text("端末の設定を使う").tag(0)
+                        Text("ライトモード").tag(1)
+                        Text("ダークモード").tag(2)
+
+                    }
+                }
+                
+                Section(header: Text("アプリ情報")) {
                     HStack {
                         Text("Version")
                         Spacer()
-                        Text("1.0.0")
+                        Text("1.0.1")
                             .foregroundColor(.secondary)
                     }
 //                    
@@ -67,4 +77,5 @@ struct SettingView: View {
 
 #Preview {
     SettingView()
+//        .preferredColorScheme(.dark)
 }
