@@ -25,7 +25,7 @@ Most investors struggle with the following:
 *   **Transaction Contextualization:** Record not only price and volume but also the emotional reasons behind your trades.
 *   **Performance Review:** Help you analyze the gap between your expectations and reality by looking back and analyzing your past trades.
 
-## 💻 Tech Stack (Example)
+## Tech Stack (Example)
 *   **Language:** Swift
 *   **Framework:** SwiftUI
 *   **Database:** SwiftData
