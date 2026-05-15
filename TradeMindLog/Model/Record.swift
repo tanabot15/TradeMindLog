@@ -44,8 +44,8 @@ class Record {
     var id: UUID = UUID()
     var stockName: String
     var tickerCode: String
-    var buyDate: Date
-    var sellDate: Date
+    var buyDate: Date?
+    var sellDate: Date?
     var buyPrice: Double
     var sellPrice: Double
     var quantity: Int
@@ -64,8 +64,8 @@ class Record {
         id: UUID,
         stockName: String,
         tickerCode: String,
-        buyDate: Date,
-        sellDate: Date,
+        buyDate: Date? = nil,
+        sellDate: Date? = nil,
         buyPrice: Double,
         sellPrice: Double,
         quantity: Int,

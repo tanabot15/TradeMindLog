@@ -9,7 +9,8 @@ import SwiftUI
 
 struct SettingView: View {
     @AppStorage("colorScheme") var colorScheme = 0
-    // @AppStorage("isMondayStart") private var isMondayStart = false
+    // first weekday (1:Sunday, 2: Monday)
+    @AppStorage("firstWeekday") private var firstWeekday = 1
     
     // Tanabot Menbership URL
     let experimentURL = URL(string: "https://note.com/tanabot/membership")!
@@ -19,7 +20,7 @@ struct SettingView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section(header: Text("noteのURL")) {
+                Section(header: Text("このアプリはここから始まった")) {
                     Link(destination: experimentURL) {
                         HStack {
                             Label("note：株を勉強して半年で100銘柄買ったら、人生は変わるのか？", systemImage: "link")
@@ -27,12 +28,16 @@ struct SettingView: View {
                     }
                 }
                 
-                Section(header: Text("画面")) {
+                Section(header: Text("設定")) {
+                    Picker("週の始まり", selection: $firstWeekday) {
+                        Text("日曜日").tag(1)
+                        Text("月曜日").tag(2)
+                    }
+                    
                     Picker("外観モード", selection: $colorScheme) {
                         Text("端末の設定を使う").tag(0)
                         Text("ライトモード").tag(1)
                         Text("ダークモード").tag(2)
-
                     }
                 }
                 
@@ -52,15 +57,6 @@ struct SettingView: View {
 //                        Text("Terms and Conditions")
 //                    }
                 }
-                
-//                Section(header: Text("App Settings")) {
-//                    Toggle(isOn: $isMondayStart) {
-//                        Text("from Monday")
-//                    }
-//                    .onChange(of: isMondayStart) {
-//
-//                    }
-//                }
 
                 Section {
                     Text("© 2026 Tanabot")

@@ -13,7 +13,6 @@ struct AddRecordView: View {
     @Environment(\.dismiss) private var dismiss
             
     @Bindable var record: Record
-    
     let isNew: Bool
     
     var body: some View {
@@ -35,9 +34,15 @@ struct AddRecordView: View {
                 
                 Section("取引日") {
                     if record.situation == .buy {
-                        DatePicker("購入日", selection: $record.buyDate, displayedComponents: .date)
+                        DatePicker("購入日", selection: Binding(
+                            get: { record.buyDate ?? Date() },
+                            set: { record.buyDate = $0 }
+                        ), displayedComponents: .date)
                     } else {
-                        DatePicker("売却日", selection: $record.sellDate, displayedComponents: .date)
+                        DatePicker("売却日", selection: Binding(
+                            get: { record.sellDate ?? Date() },
+                            set: { record.sellDate = $0 }
+                        ), displayedComponents: .date)
                     }
                     
                     if record.situation == .buy {

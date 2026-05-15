@@ -12,42 +12,56 @@ struct CalendarView: View {
     @Environment(\.modelContext) var modelContext
     @Query(sort: \Record.sellDate, order: .reverse) private var records: [Record]
     
+    @AppStorage("firstWeekday") private var firstWeekday = 1
+    
     @State private var selectedDate: DateComponents? = nil
     @State private var recordToCreate: Record?
     
     var filteredRecords: (buy: [Record], sell: [Record]) {
         guard let date = selectedDate?.date else { return ([], []) }
-        let buy = records.filter { Calendar.current.isDate($0.buyDate, inSameDayAs: date) && $0.situation == .buy }
-        let sell = records.filter { Calendar.current.isDate($0.sellDate, inSameDayAs: date) && $0.situation == .sell }
+        
+        let buy = records.filter { record in
+            if let bDate = record.buyDate {
+                return Calendar.current.isDate(bDate, inSameDayAs: date) && record.situation == .buy
+            }
+            return false
+        }
+        let sell = records.filter { record in
+            if let sDate = record.sellDate {
+                return Calendar.current.isDate(sDate, inSameDayAs: date) && record.situation == .sell
+            }
+            return false
+        }
         return (buy, sell)
     }
     
     var body: some View {
         NavigationStack {
-            VStack {
-                CalendarViewRepresentable(records: records, selectedDate: $selectedDate)
-                    .id(records.count)
-                    .frame(height: 400)
-                    .padding()
-                
-                Spacer()
-                    .frame(height: 50)
-                
-                List {
-                    if filteredRecords.buy.isEmpty && filteredRecords.sell.isEmpty {
-                        Text("Recordがありません")
-                    } else {
-                        // buy section
-                        recordSection(title: "購入Record", records: filteredRecords.buy, color: .blue)
-                        // sell section
-                        recordSection(title: "売却Records", records: filteredRecords.sell, color: .red)
-                    }
+            List {
+                Section {
+                    CalendarViewRepresentable(
+                        records: records,
+                        selectedDate: $selectedDate,
+                        firstWeekday: firstWeekday
+                    )
+                        .id("\(records.count)-\(firstWeekday)")
+                        .frame(height: 400)
+                        .listRowInsets(EdgeInsets())
+                        .padding(3)
                 }
-                .scrollContentBackground(.hidden)
-                .background(Color(.systemBackground))
+                .listRowBackground(Color.clear)
                 
-                Spacer()
+                if filteredRecords.buy.isEmpty && filteredRecords.sell.isEmpty {
+                    Text("Recordがありません")
+                } else {
+                    // buy section
+                    recordSection(title: "購入Record", records: filteredRecords.buy, color: .blue)
+                    // sell section
+                    recordSection(title: "売却Records", records: filteredRecords.sell, color: .red)
+                }
             }
+            .scrollContentBackground(.hidden)
+            .background(Color(.systemBackground))
             .navigationTitle("Calendar")
             .toolbar {
                 Button("Add Record", systemImage: "plus") {
@@ -74,7 +88,9 @@ struct CalendarView: View {
                                 Text(record.stockName)
                                     .font(.title3).fontWeight(.semibold)
                                 }
+                            
                             Spacer()
+                            
                             VStack(alignment: .trailing) {
                                 let reason = record.situation == .buy ? record.buyReason.rawValue : record.sellReason.rawValue
                                 let price = record.situation == .buy ? record.buyPrice : record.sellPrice
@@ -91,7 +107,7 @@ struct CalendarView: View {
                         }
                         .padding(.vertical, 2)
                     }
-                    .listRowBackground(color.opacity(0.15))
+                    .listRowBackground(color.opacity(0.40))
                 }
                 .onDelete(perform: { offsets in deleteSpecificRecords(at: offsets, from: records) })
             }
@@ -108,12 +124,17 @@ struct CalendarView: View {
     struct CalendarViewRepresentable: UIViewRepresentable {
         let records: [Record]
         @Binding var selectedDate: DateComponents?
+        let firstWeekday: Int
         
         func makeUIView(context: Context) -> UICalendarView {
             let calendarView = UICalendarView()
             calendarView.backgroundColor = .clear
             
-            calendarView.calendar = Calendar(identifier: .gregorian)
+            // firstweekday setting
+            var calendar = Calendar(identifier: .gregorian)
+            calendar.firstWeekday = firstWeekday
+            
+            calendarView.calendar = calendar
             calendarView.locale = .current
             calendarView.fontDesign = .rounded
             
@@ -131,10 +152,19 @@ struct CalendarView: View {
         }
         
         func updateUIView(_ uiView: UICalendarView, context: Context) {
-            // will create when show dots
-            print("updateUIView triggered. Records count: \(records.count)")
-            let buyDates = records.map { Calendar.current.dateComponents([.year, .month, .day], from: $0.buyDate) }
-            let sellDates = records.map { Calendar.current.dateComponents([.year, .month, .day], from: $0.sellDate) }
+            // change firstweekday
+            if uiView.calendar.firstWeekday != firstWeekday {
+                uiView.calendar.firstWeekday = firstWeekday
+            }
+
+            let buyDates = records.compactMap { record -> DateComponents? in
+                guard let bDate = record.buyDate else { return nil }
+                return Calendar.current.dateComponents([.year, .month, .day], from: bDate)
+            }
+            let sellDates = records.compactMap { record -> DateComponents? in
+                guard let sDate = record.sellDate else { return nil }
+                return Calendar.current.dateComponents([.year, .month, .day], from: sDate)
+            }
             let allComponents = Array(Set(buyDates + sellDates))
             
             DispatchQueue.main.async {
@@ -155,18 +185,27 @@ struct CalendarView: View {
             
             // show dots under date
             func calendarView(_ calendarView: UICalendarView, decorationFor dateComponents: DateComponents) -> UICalendarView.Decoration? {
+                guard let targetDate = dateComponents.date else { return nil }
+                
                 let hasBuyRecord = parent.records.contains { record in
-                    Calendar.current.isDate(record.buyDate, inSameDayAs: dateComponents.date ?? Date())
+                    if let bDate = record.buyDate {
+                        return Calendar.current.isDate(bDate, inSameDayAs: targetDate)
+                    }
+                    return false
                 }
+                
                 let hasSellRecord = parent.records.contains { record in
-                    Calendar.current.isDate(record.sellDate, inSameDayAs: dateComponents.date ?? Date())
+                    if let sDate = record.sellDate {
+                        return Calendar.current.isDate(sDate, inSameDayAs: targetDate)
+                    }
+                    return false
                 }
                         
                 if hasBuyRecord && hasSellRecord {
                     return .default(color: .systemPurple, size: .medium)
-                } else if hasBuyRecord && !hasSellRecord {
+                } else if hasBuyRecord {
                     return .default(color: .systemBlue, size: .medium)
-                } else if hasSellRecord && !hasBuyRecord {
+                } else if hasSellRecord {
                     return .default(color: .systemRed, size: .medium)
                 }
                 
@@ -195,8 +234,8 @@ struct CalendarView: View {
             id: UUID(),
             stockName: "",
             tickerCode: "",
-            buyDate: .now,
-            sellDate: .now,
+            buyDate: nil,
+            sellDate: nil,
             buyPrice: 0.0,
             sellPrice: 0.0,
             quantity: 100,
