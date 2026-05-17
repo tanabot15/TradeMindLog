@@ -14,6 +14,9 @@ struct AnalysisView: View {
     
     @State private var selectedSituation = "購入"
     
+    @AppStorage("customBuyReasons") private var customBuyReasons: [String] = []
+    @AppStorage("customSellReasons") private var customSellReasons: [String] = []
+    
     var filteredRecords: [Record] {
         records.filter { $0.situation.rawValue == selectedSituation}
     }
@@ -26,25 +29,29 @@ struct AnalysisView: View {
     }
     
     var buyReasonStats: [ReasonStat] {
-        let groupedByReason = Dictionary(grouping: filteredRecords) { $0.buyReason }
+        let groupedByReason = Dictionary(grouping: filteredRecords) { record in
+            record.buyReason.localizedName(customNames: customBuyReasons)
+        }
         let total = Double(filteredRecords.count)
-        return groupedByReason.map {
+        return groupedByReason.map { key, value in
             ReasonStat(
-                reason: $0.key.rawValue,
-                count: $0.value.count,
-                percentage: total > 0 ? (Double($0.value.count) / total) * 100 : 0
+                reason: key,
+                count: value.count,
+                percentage: total > 0 ? (Double(value.count) / total) * 100 : 0
             )
         }.sorted { $0.count > $1.count }
     }
     
     var sellReasonStats: [ReasonStat] {
-        let groupedByReason = Dictionary(grouping: filteredRecords) { $0.sellReason }
+        let groupedByReason = Dictionary(grouping: filteredRecords) { record in
+            record.sellReason.localizedName(customNames: customSellReasons)
+        }
         let total = Double(filteredRecords.count)
-        return groupedByReason.map {
+        return groupedByReason.map { key, value in
             ReasonStat(
-                reason: $0.key.rawValue,
-                count: $0.value.count,
-                percentage: total > 0 ? (Double($0.value.count) / total) * 100 : 0
+                reason: key,
+                count: value.count,
+                percentage: total > 0 ? (Double(value.count) / total) * 100 : 0
             )
         }.sorted { $0.count > $1.count}
     }

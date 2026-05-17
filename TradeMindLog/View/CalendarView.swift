@@ -13,6 +13,8 @@ struct CalendarView: View {
     @Query(sort: \Record.sellDate, order: .reverse) private var records: [Record]
     
     @AppStorage("firstWeekday") private var firstWeekday = 1
+    @AppStorage("customBuyReasons") private var customBuyReasons: [String] = []
+    @AppStorage("customSellReasons") private var customSellReasons: [String] = []
     
     @State private var selectedDate: DateComponents? = nil
     @State private var recordToCreate: Record?
@@ -92,7 +94,7 @@ struct CalendarView: View {
                             Spacer()
                             
                             VStack(alignment: .trailing) {
-                                let reason = record.situation == .buy ? record.buyReason.rawValue : record.sellReason.rawValue
+                                let reason = record.situation == .buy ? record.buyReason.localizedName(customNames: customBuyReasons) : record.buyReason.localizedName(customNames: customSellReasons)
                                 let price = record.situation == .buy ? record.buyPrice : record.sellPrice
                                         
                                 Text("理由：\(reason)").font(.subheadline).bold()

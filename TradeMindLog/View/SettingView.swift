@@ -12,17 +12,20 @@ struct SettingView: View {
     @Environment(\.modelContext) private var modelContext
     
     @AppStorage("colorScheme") var colorScheme = 0
-    // first weekday (1:Sunday, 2: Monday)
     @AppStorage("firstWeekday") private var firstWeekday = 1
     
+    @AppStorage("customBuyReasons") private var customBuyReasons: [String] = BuyReason.allCases.map { $0.rawValue }
+    @AppStorage("customSellReasons") private var customSellReasons: [String] = SellReason.allCases.map { $0.rawValue }
+    
     @State private var isShowingDeleteAleart = false
+    @State private var isShowingEditSheet = false
     
     // Tanabot Menbership URL
     let experimentURL = URL(string: "https://note.com/tanabot/membership")!
     let noteMembershipTitle = """
     株を勉強して半年で100銘柄買ったら、
     人生は変わるのか？
-     （ noteのメンバーシップページ ）
+     （ noteメンバーシップページ ）
     """
     
     let privacyPolicyURL = URL(string: "https://sites.google.com/view/trademindlog/%E3%83%97%E3%83%A9%E3%82%A4%E3%83%90%E3%82%B7%E3%83%BC-%E3%83%9D%E3%83%AA%E3%82%B7%E3%83%BC")!
@@ -31,7 +34,7 @@ struct SettingView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section(header: Text("このアプリはこの実験から始まった")) {
+                Section(header: Text("このアプリはこの実験から始まった...")) {
                     Link(destination: experimentURL) {
                         HStack {
                             Text(noteMembershipTitle)
@@ -54,13 +57,25 @@ struct SettingView: View {
                         Text("ライトモード").tag(1)
                         Text("ダークモード").tag(2)
                     }
+                    
+                    Button {
+                        isShowingEditSheet = true
+                    } label: {
+                        HStack {
+                            Text("売買理由のカスタマイズ")
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.secondary)
+                        }
+                    }
                 }
                 
                 Section(header: Text("アプリ情報")) {
                     HStack {
                         Text("Version")
                         Spacer()
-                        Text("1.4")
+                        Text("1.5")
                             .foregroundColor(.secondary)
                     }
                     
@@ -109,6 +124,12 @@ struct SettingView: View {
                 .listRowBackground(Color.clear)
             }
             .navigationTitle("Setting")
+            .sheet(isPresented: $isShowingEditSheet) {
+                ReasonEditSheetView(
+                    customBuyReasons: $customBuyReasons,
+                    customSellReasons: $customSellReasons
+                )
+            }
             .alert("すべてのデータを削除しますか？", isPresented: $isShowingDeleteAleart) {
                 Button("Cancel", role: .cancel) { }
                 Button("Delete All", role: .destructive) {
@@ -119,13 +140,47 @@ struct SettingView: View {
             }
         }
     }
-    
+        
     private func deleteAllRecords() {
         do {
             try modelContext.delete(model: Record.self)
             try modelContext.save()
         } catch {
             print("Failed to delete all records: \(error)")
+        }
+    }
+}
+
+struct ReasonEditSheetView: View {
+    @Environment(\.dismiss) private var dismiss
+    
+    @Binding var customBuyReasons: [String]
+    @Binding var customSellReasons: [String]
+    
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section(header: Text("購入理由")) {
+                    ForEach(0..<customBuyReasons.count, id: \.self) { index in
+                        TextField("理由を入力", text: $customBuyReasons[index])
+                    }
+                }
+                
+                Section(header: Text("売却理由")) {
+                    ForEach(0..<customSellReasons.count, id: \.self) { index in
+                        TextField("理由を入力", text: $customSellReasons[index])
+                    }
+                }
+            }
+            .navigationTitle("売買理由のカスタマイズ")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
         }
     }
 }

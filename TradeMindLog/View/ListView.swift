@@ -12,6 +12,9 @@ struct ListView: View {
     @Environment(\.modelContext) var modelContext
     @Query(sort: \Record.buyDate, order: .reverse) private var records: [Record]
     
+    @AppStorage("customBuyReasons") private var customBuyReasons: [String] = []
+    @AppStorage("customSellReasons") private var customSellReasons: [String] = []
+    
     @State private var selectedSituation = "購入"
     @State private var recordToCreate: Record?
     
@@ -43,7 +46,7 @@ struct ListView: View {
                             Spacer()
                             
                             VStack(alignment: .trailing) {
-                                Text("理由：\(record.situation == .buy ? record.buyReason.rawValue : record.sellReason.rawValue)")
+                                Text("理由：\(record.situation == .buy ? record.buyReason.localizedName(customNames: customBuyReasons) : record.sellReason.localizedName(customNames: customSellReasons))")
                                     .font(.headline)
                                 HStack {
                                     Text("\(record.quantity)株")

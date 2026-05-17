@@ -49,16 +49,11 @@ class Record {
     var buyPrice: Double
     var sellPrice: Double
     var quantity: Int
-    var situation: Situation
     var buyReason: BuyReason
     var sellReason: SellReason
+    var situation: Situation
     var note: String
     var reflection: String
-        
-    // caluculate profit
-    var profit: Double {
-        (sellPrice - buyPrice) * Double(quantity)
-    }
     
     init(
         id: UUID,
@@ -88,5 +83,43 @@ class Record {
         self.sellReason = sellReason
         self.note = note
         self.reflection = reflection
+    }
+}
+
+extension Array: @retroactive RawRepresentable where Element == String {
+    public init?(rawValue: String) {
+        guard let data = rawValue.data(using: .utf8),
+              let result = try? JSONDecoder().decode([String].self, from: data) else {
+            return nil
+        }
+        self = result
+    }
+    
+    public var rawValue: String {
+        guard let data = try? JSONEncoder().encode(self),
+              let result = String(data: data, encoding: .utf8) else {
+            return "[]"
+        }
+        return result
+    }
+}
+
+extension BuyReason {
+    func localizedName(customNames: [String]) -> String {
+        let index = BuyReason.allCases.firstIndex(of: self) ?? 0
+        if index < customNames.count {
+            return customNames[index]
+        }
+        return self.rawValue
+    }
+}
+
+extension SellReason {
+    func localizedName(customNames: [String]) -> String {
+        let index = SellReason.allCases.firstIndex(of: self) ?? 0
+        if index < customNames.count {
+            return customNames[index]
+        }
+        return self.rawValue
     }
 }

@@ -11,6 +11,9 @@ import SwiftData
 struct AddRecordView: View {
     @Environment(\.modelContext) var modelContext
     @Environment(\.dismiss) private var dismiss
+    
+    @AppStorage("customBuyReasons") private var customBuyReasons: [String] = []
+    @AppStorage("customSellReasons") private var customSellReasons: [String] = []
             
     @Bindable var record: Record
     let isNew: Bool
@@ -67,14 +70,14 @@ struct AddRecordView: View {
                     if record.situation == .buy {
                         Picker("購入理由を選んでください", selection: $record.buyReason) {
                             ForEach(BuyReason.allCases) { reason in
-                                Text(reason.rawValue).tag(reason)
+                                Text(reason.localizedName(customNames: customBuyReasons)).tag(reason)
                                 
                             }
                         }
                     } else {
                         Picker("売却理由を選んでください", selection: $record.sellReason) {
                             ForEach(SellReason.allCases) { reason in
-                                Text(reason.rawValue).tag(reason)
+                                Text(reason.localizedName(customNames: customSellReasons)).tag(reason)
                                 
                             }
                         }
