@@ -22,17 +22,36 @@ struct AnalysisView: View {
         let id = UUID()
         let reason: String
         let count: Int
+        let percentage: Double
     }
     
     var buyReasonStats: [ReasonStat] {
         let groupedByReason = Dictionary(grouping: filteredRecords) { $0.buyReason }
-        return groupedByReason.map { ReasonStat(reason: $0.key.rawValue, count: $0.value.count)}
+        let total = Double(filteredRecords.count)
+        return groupedByReason.map {
+            ReasonStat(
+                reason: $0.key.rawValue,
+                count: $0.value.count,
+                percentage: total > 0 ? (Double($0.value.count) / total) * 100 : 0
+            )
+        }.sorted { $0.count > $1.count }
     }
     
     var sellReasonStats: [ReasonStat] {
         let groupedByReason = Dictionary(grouping: filteredRecords) { $0.sellReason }
-        return groupedByReason.map { ReasonStat(reason: $0.key.rawValue, count: $0.value.count)}
+        let total = Double(filteredRecords.count)
+        return groupedByReason.map {
+            ReasonStat(
+                reason: $0.key.rawValue,
+                count: $0.value.count,
+                percentage: total > 0 ? (Double($0.value.count) / total) * 100 : 0
+            )
+        }.sorted { $0.count > $1.count}
     }
+    
+    let chartColors: [Color] = [
+        .teal, .orange, .green, .cyan, .yellow, .indigo, .mint
+    ]
     
     var body: some View {
         NavigationStack {
@@ -41,83 +60,108 @@ struct AnalysisView: View {
                 Text("売却").tag("売却")
             }
             .pickerStyle(.segmented)
-            .padding(.horizontal, 10)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
 
             ScrollView {
-                VStack {
+                VStack(spacing: 12) {
                     if filteredRecords.isEmpty {
                         ContentUnavailableView(
                             "Recordがありません",
                             systemImage: "chart.pie",
                             description: Text("Recordが追加されると、あなたの投資における売買傾向が視覚化されます")
                         )
-                        .padding(.top, 50)
-                    } else if selectedSituation == "購入" {
-                        Chart(buyReasonStats) { stat in
-                            SectorMark (
-                                angle: .value("count", stat.count),
-                                innerRadius: .ratio(0.5),
-                                angularInset: 1
-                            )
-                            .cornerRadius(5)
-                            .foregroundStyle(by: .value("購入理由", stat.reason))
+                        .padding(.top, 60)
+                    } else {
+                        VStack {
+                            Text("\(selectedSituation)理由の比率")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .bold()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            
+                            ZStack {
+                                Chart(selectedSituation == "購入" ? buyReasonStats : sellReasonStats) { stat in
+                                    SectorMark (
+                                        angle: .value("count", stat.count),
+                                        innerRadius: .ratio(0.5),
+                                        angularInset: 1
+                                    )
+                                    .cornerRadius(6)
+                                    .foregroundStyle(by: .value("理由", stat.reason))
+                                    .annotation(position: .overlay) {
+                                        if stat.percentage > 10 {
+                                            VStack {
+                                                Text("\(stat.reason)")
+                                                Text(String(format: "%.0f%%", stat.percentage))
+                                            }
+                                            .font(.caption2)
+                                            .bold()
+                                            .foregroundStyle(.white)
+                                        }
+                                    }
+                                }
+                                .chartForegroundStyleScale(
+                                    domain: (selectedSituation == "購入" ? buyReasonStats : sellReasonStats).map { $0.reason },
+                                    range: chartColors
+                                )
+                                .chartLegend(.hidden)
+                                .frame(height: 240)
+                                
+                                VStack(spacing: 2) {
+                                    Text("TOTAL")
+                                        .font(.caption2)
+                                        .bold()
+                                        .foregroundStyle(.secondary)
+                                    Text("\(filteredRecords.count)")
+                                        .font(.system(.title, design: .rounded))
+                                        .bold()
+                                }
+                            }
                         }
-                        .frame(height: 300)
-                        .chartLegend(position: .bottom, alignment: .center, spacing: 20)
-                        .padding()
-                    } else if selectedSituation == "売却" {
-                        Chart(sellReasonStats) { stat in
-                            SectorMark (
-                                angle: .value("count", stat.count),
-                                innerRadius: .ratio(0.5),
-                                angularInset: 1
-                            )
-                            .cornerRadius(5)
-                            .foregroundStyle(by: .value("売却理由", stat.reason))
-                        }
-                        .frame(height: 300)
-                        .chartLegend(position: .bottom, alignment: .center, spacing: 20)
-                        .padding()
-                    }
+                        .padding(16)
+                        .background(Color(.secondarySystemBackground))
+                        .cornerRadius(16)
+                        .padding(.horizontal, 16)
                     
-                    VStack(alignment: .leading) {
-                        if !filteredRecords.isEmpty {
-                            Text("売買理由集計")
+                        VStack(alignment: .leading) {
+                            Text("売買理由の集計詳細")
                                 .font(.headline)
-                                .padding()
-                        }
-                        
-                        if selectedSituation == "購入" {
-                            ForEach(buyReasonStats) { stat in
-                                HStack {
-                                    Text(stat.reason)
-                                    Spacer()
-                                    Text("\(stat.count)")
-                                    
-                                    // ration
-                                    Text(String(format: "(%.1f%%)", Double(stat.count) / Double(filteredRecords.count) * 100))
-                                        .font(.caption2)
-                                }
                                 .padding(.horizontal)
-                                Divider()
-                            }
-                        } else if selectedSituation == "売却" {
-                            ForEach(sellReasonStats) { stat in
-                                HStack {
-                                    Text(stat.reason)
-                                    Spacer()
-                                    Text("\(stat.count)")
+                                .padding(.top, 10)
+                            
+                            VStack(spacing: 0) {
+                                let currentStats = selectedSituation == "購入" ? buyReasonStats : sellReasonStats
+                                
+                                ForEach(Array(currentStats.enumerated()), id: \.element.id) { index,stat in
+                                    HStack(spacing: 12) {
+                                        Circle()
+                                            .fill(chartColors[index % chartColors.count])
+                                            .frame(width: 10, height: 10)
+                                        
+                                        Text(stat.reason)
+                                            .font(.body)
+                                        
+                                        Spacer()
+                                        
+                                        Text("\(stat.count) 回")
+                                            .font(.body)
+                                            .bold()
+                                        
+                                        Text(String(format: "%.1f%%", stat.percentage))
+                                            .font(.subheadline)
+                                            .foregroundStyle(.secondary)
+                                            .frame(width: 60, alignment: .trailing)
+                                    }
+                                    .padding()
                                     
-                                    // ration
-                                    Text(String(format: "(%.1f%%)", Double(stat.count) / Double(filteredRecords.count) * 100))
-                                        .font(.caption2)
+                                    if index < currentStats.count - 1 {
+                                        Divider()
+                                    }
                                 }
-                                .padding(.horizontal)
-                                Divider()
                             }
                         }
                     }
-                    .padding(.bottom)
                 }
             }
             .navigationTitle("Analysis")

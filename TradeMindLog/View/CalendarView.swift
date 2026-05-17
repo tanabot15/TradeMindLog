@@ -234,7 +234,7 @@ struct CalendarView: View {
             id: UUID(),
             stockName: "",
             tickerCode: "",
-            buyDate: nil,
+            buyDate: .now,
             sellDate: nil,
             buyPrice: 0.0,
             sellPrice: 0.0,

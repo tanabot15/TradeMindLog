@@ -29,7 +29,6 @@ struct AddRecordView: View {
                 Section("株式情報") {
                     TextField("Stock Name", text: $record.stockName)
                     TextField("Ticker Code", text: $record.tickerCode)
-                        .keyboardType(.numberPad)
                 }
                 
                 Section("取引日") {
@@ -47,19 +46,21 @@ struct AddRecordView: View {
                     
                     if record.situation == .buy {
                         HStack {
-                            Text("購入額    ")
+                            Text("購入額：")
+                            Spacer()
                             TextField("0", value: $record.buyPrice, format: .number)
                                 .keyboardType(.decimalPad)
                         }
                     } else {
                         HStack {
-                            Text("売却額    ")
+                            Text("売却額：")
+                            Spacer()
                             TextField("0", value: $record.sellPrice, format: .number)
                                 .keyboardType(.decimalPad)
                         }
                     }
 
-                    Stepper("株式数:    \(record.quantity)", value: $record.quantity, in: 100...100000, step: 100)
+                    Stepper("株式数：    \(record.quantity)", value: $record.quantity, in: 100...100000, step: 100)
                 }
                 
                 Section("売買理由") {
@@ -100,6 +101,15 @@ struct AddRecordView: View {
                                 .frame(maxWidth: .infinity)
                         }
                     }
+                }
+            }
+            .onChange(of: record.situation) { oldValue, newValue in
+                if newValue == .buy {
+                    record.buyDate = .now
+                    record.sellDate = nil
+                } else {
+                    record.buyDate = nil
+                    record.sellDate = .now
                 }
             }
             .navigationTitle(isNew ? "Recordの追加" : "Recorの確認・編集")
