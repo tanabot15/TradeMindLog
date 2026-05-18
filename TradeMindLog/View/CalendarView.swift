@@ -43,8 +43,8 @@ struct CalendarView: View {
                 Section {
                     CalendarViewRepresentable(
                         records: records,
-                        selectedDate: $selectedDate,
-                        firstWeekday: firstWeekday
+                        firstWeekday: firstWeekday,
+                        selectedDate: $selectedDate
                     )
                         .id("\(records.count)-\(firstWeekday)")
                         .frame(height: 400)
@@ -125,28 +125,19 @@ struct CalendarView: View {
     // UICalendarView Wrapper
     struct CalendarViewRepresentable: UIViewRepresentable {
         let records: [Record]
-        @Binding var selectedDate: DateComponents?
         let firstWeekday: Int
+        @Binding var selectedDate: DateComponents?
         
         func makeUIView(context: Context) -> UICalendarView {
             let calendarView = UICalendarView()
-            calendarView.backgroundColor = .clear
+            calendarView.calendar = Calendar.current
+            calendarView.calendar.firstWeekday = firstWeekday
+            calendarView.locale = Locale(identifier: "ja_JP")
             
-            // firstweekday setting
-            var calendar = Calendar(identifier: .gregorian)
-            calendar.firstWeekday = firstWeekday
-            
-            calendarView.calendar = calendar
-            calendarView.locale = .current
-            calendarView.fontDesign = .rounded
-            
-            // setthing delegate first
+            let dateSelection = UICalendarSelectionSingleDate(delegate: context.coordinator)
+            calendarView.selectionBehavior = dateSelection
             calendarView.delegate = context.coordinator
-                
-            // set movement
-            let selection = UICalendarSelectionSingleDate(delegate: context.coordinator)
-            calendarView.selectionBehavior = selection
-                
+            
             calendarView.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
             calendarView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
                 
@@ -154,10 +145,7 @@ struct CalendarView: View {
         }
         
         func updateUIView(_ uiView: UICalendarView, context: Context) {
-            // change firstweekday
-            if uiView.calendar.firstWeekday != firstWeekday {
-                uiView.calendar.firstWeekday = firstWeekday
-            }
+            uiView.calendar.firstWeekday = firstWeekday
 
             let buyDates = records.compactMap { record -> DateComponents? in
                 guard let bDate = record.buyDate else { return nil }
@@ -187,20 +175,16 @@ struct CalendarView: View {
             
             // show dots under date
             func calendarView(_ calendarView: UICalendarView, decorationFor dateComponents: DateComponents) -> UICalendarView.Decoration? {
-                guard let targetDate = dateComponents.date else { return nil }
+                guard let date = dateComponents.date else { return nil }
                 
                 let hasBuyRecord = parent.records.contains { record in
-                    if let bDate = record.buyDate {
-                        return Calendar.current.isDate(bDate, inSameDayAs: targetDate)
-                    }
-                    return false
+                    guard record.situation == .buy, let bDate = record.buyDate else { return false }
+                    return Calendar.current.isDate(bDate, inSameDayAs: date)
                 }
                 
                 let hasSellRecord = parent.records.contains { record in
-                    if let sDate = record.sellDate {
-                        return Calendar.current.isDate(sDate, inSameDayAs: targetDate)
-                    }
-                    return false
+                    guard record.situation == .sell, let sDate = record.sellDate else { return false }
+                    return Calendar.current.isDate(sDate, inSameDayAs: date)
                 }
                         
                 if hasBuyRecord && hasSellRecord {
