@@ -7,9 +7,37 @@
 
 import SwiftUI
 import SwiftData
+import UniformTypeIdentifiers
+
+// csv document
+struct CSVDocument: FileDocument {
+    static var readableContentTypes: [UTType] { [.commaSeparatedText] }
+    
+    var text: String
+    
+    init(text: String) {
+        self.text = text
+    }
+    
+    init(configuration: ReadConfiguration) throws {
+        if let data = configuration.file.regularFileContents,
+           let string = String(data: data, encoding: .utf8) {
+            self.text = string
+        } else {
+            self.text = ""
+        }
+    }
+    
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        let data = text.data(using: .utf8) ?? Data()
+        return FileWrapper(regularFileWithContents: data)
+    }
+}
 
 struct SettingView: View {
     @Environment(\.modelContext) private var modelContext
+    
+    @Query(sort: \Record.tickerCode, order: .forward) private var records: [Record]
     
     @AppStorage("colorScheme") var colorScheme = 0
     @AppStorage("firstWeekday") private var firstWeekday = 1
@@ -19,6 +47,9 @@ struct SettingView: View {
     
     @State private var isShowingDeleteAleart = false
     @State private var isShowingEditSheet = false
+    
+    @State private var isShowingExporter = false
+    @State private var exportDocument: CSVDocument? = nil
     
     // Tanabot Menbership URL
     let experimentURL = URL(string: "https://note.com/tanabot/membership")!
@@ -71,11 +102,36 @@ struct SettingView: View {
                     }
                 }
                 
+                Section(header: Text("データ管理")) {
+                    Button {
+                        generateAndExportCSV()
+                    } label: {
+                        HStack {
+                            Text("CSVファイルとして書き出す")
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Image(systemName: "doc.badge.plus")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    Button(role: .destructive) {
+                        isShowingDeleteAleart = true
+                    } label: {
+                        HStack {
+                            Text("すべての記録を削除")
+                            Spacer()
+                            Image(systemName: "trash")
+                                .font(.subheadline)
+                        }
+                    }
+                }
+                
                 Section(header: Text("アプリ情報")) {
                     HStack {
                         Text("Version")
                         Spacer()
-                        Text("1.5")
+                        Text("1.7")
                             .foregroundColor(.secondary)
                     }
                     
@@ -101,19 +157,6 @@ struct SettingView: View {
                         }
                     }
                 }
-                
-                Section(header: Text("データ管理")) {
-                    Button(role: .destructive) {
-                        isShowingDeleteAleart = true
-                    } label: {
-                        HStack {
-                            Text("すべての記録を削除")
-                            Spacer()
-                            Image(systemName: "trash")
-                                .font(.subheadline)
-                        }
-                    }
-                }
 
                 Section {
                     Text("© 2026 Tanabot")
@@ -130,6 +173,19 @@ struct SettingView: View {
                     customSellReasons: $customSellReasons
                 )
             }
+            .fileExporter(
+                isPresented: $isShowingExporter,
+                document: exportDocument,
+                contentType: .commaSeparatedText,
+                defaultFilename: "TradeMindLog_\(Date().formattedString())"
+            ) { result in
+                switch result {
+                case .success(let url):
+                    print("CSVを正常に保存しました： \(url.lastPathComponent)")
+                case .failure(let error):
+                    print("CSV保存エラー： \(error.localizedDescription)")
+                }
+            }
             .alert("すべてのデータを削除しますか？", isPresented: $isShowingDeleteAleart) {
                 Button("Cancel", role: .cancel) { }
                 Button("Delete All", role: .destructive) {
@@ -139,6 +195,37 @@ struct SettingView: View {
                 Text("この操作は取り消せません。これまでに登録したすべてのデータが完全に消去されます。")
             }
         }
+    }
+    
+    private func generateAndExportCSV() {
+        var csvString = "ID,状況,銘柄名,ティッカーコード,数量,購入日,購入価格,売却日,売却価格,購入理由,売却理由,ノート,振り返り\n"
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy/MM/dd"
+        
+        for record in records {
+            let id = record.id.uuidString
+            let situation = record.situation.rawValue
+            let stockName = "\"\(record.stockName.replacingOccurrences(of: "\"", with: "\"\""))\""
+            let ticker = record.tickerCode
+            let qty = record.quantity
+            let buyDateStr = record.buyDate != nil ? formatter.string(from: record.buyDate!) : ""
+            let buyPrice = record.buyPrice
+            let sellDateStr = record.sellDate != nil ? formatter.string(from: record.sellDate!) : ""
+            let sellPrice = record.sellPrice
+            
+            let buyReason = record.buyReason.localizedName(customNames: customBuyReasons)
+            let sellReason = record.sellReason.localizedName(customNames: customSellReasons)
+            
+            let note = "\"\(record.note.replacingOccurrences(of: "\"", with: "\"\""))\""
+            let reflection = "\"\(record.reflection.replacingOccurrences(of: "\"", with: "\"\""))\""
+            
+            let row = "\(id),\(situation),\(stockName),\(ticker),\(qty),\(buyDateStr),\(buyPrice),\(sellDateStr),\(sellPrice),\(buyReason),\(sellReason),\(note),\(reflection)\n"
+            csvString.append(row)
+        }
+        
+        self.exportDocument = CSVDocument(text: csvString)
+        self.isShowingExporter = true
     }
         
     private func deleteAllRecords() {
@@ -182,6 +269,14 @@ struct ReasonEditSheetView: View {
                 }
             }
         }
+    }
+}
+
+extension Date {
+    func formattedString() -> String {
+        let f = DateFormatter()
+        f.dateFormat = "yyyyMMdd_HHmmss"
+        return f.string(from: self)
     }
 }
 

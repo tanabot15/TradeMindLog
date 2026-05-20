@@ -108,11 +108,15 @@ struct AddRecordView: View {
             }
             .onChange(of: record.situation) { oldValue, newValue in
                 if newValue == .buy {
-                    record.buyDate = .now
+                    if let savedDate = record.sellDate {
+                        record.buyDate = savedDate
+                    }
                     record.sellDate = nil
                 } else {
+                    if let savedDate = record.buyDate {
+                        record.sellDate = savedDate
+                    }
                     record.buyDate = nil
-                    record.sellDate = .now
                 }
             }
             .navigationTitle(isNew ? "Recordの追加" : "Recorの確認・編集")

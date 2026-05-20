@@ -216,11 +216,13 @@ struct CalendarView: View {
     }
     
     private func createNewRecord() {
+        let defaultDate = selectedDate?.date ?? .now
+        
         let newRecord = Record(
             id: UUID(),
             stockName: "",
             tickerCode: "",
-            buyDate: .now,
+            buyDate: defaultDate,
             sellDate: nil,
             buyPrice: 0.0,
             sellPrice: 0.0,
