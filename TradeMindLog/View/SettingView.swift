@@ -48,8 +48,14 @@ struct SettingView: View {
     @State private var isShowingDeleteAleart = false
     @State private var isShowingEditSheet = false
     
-    @State private var isShowingExporter = false
+    // csv export, import
     @State private var exportDocument: CSVDocument? = nil
+    @State private var isShowingExporter = false
+//    @State private var isShowingExportAlert = false
+//    @State private var exportAlertMessage = ""
+    @State private var isShowingImporter = false
+    @State private var isShowingImportAlert = false
+    @State private var importAlertMessage = ""
     
     // Tanabot Menbership URL
     let experimentURL = URL(string: "https://note.com/tanabot/membership")!
@@ -107,10 +113,22 @@ struct SettingView: View {
                         generateAndExportCSV()
                     } label: {
                         HStack {
-                            Text("CSVファイルとして書き出す")
+                            Text("CSVファイルをエクスポート")
                                 .foregroundColor(.primary)
                             Spacer()
-                            Image(systemName: "doc.badge.plus")
+                            Image(systemName: "square.and.arrow.up")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    Button {
+                         isShowingImporter = true
+                    } label: {
+                        HStack {
+                            Text("CSVファイルをインポート")
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Image(systemName: "square.and.arrow.down")
                                 .foregroundColor(.secondary)
                         }
                     }
@@ -131,7 +149,7 @@ struct SettingView: View {
                     HStack {
                         Text("Version")
                         Spacer()
-                        Text("1.7")
+                        Text("1.8")
                             .foregroundColor(.secondary)
                     }
                     
@@ -186,7 +204,24 @@ struct SettingView: View {
                     print("CSV保存エラー： \(error.localizedDescription)")
                 }
             }
-            .alert("すべてのデータを削除しますか？", isPresented: $isShowingDeleteAleart) {
+            .fileImporter(
+                isPresented: $isShowingImporter,
+                allowedContentTypes: [.commaSeparatedText],
+                allowsMultipleSelection: false
+            ) { result in
+                switch result {
+                case .success(let url):
+                    guard let selectedURL = url.first else { return }
+                    importCSV(from: selectedURL)
+                case .failure(let error):
+                    print("CSV selection error: \(error.localizedDescription)")
+                }
+            }
+            .alert("CSVをインポートします", isPresented: $isShowingImportAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(importAlertMessage)
+            }            .alert("すべてのデータを削除しますか？", isPresented: $isShowingDeleteAleart) {
                 Button("Cancel", role: .cancel) { }
                 Button("Delete All", role: .destructive) {
                     deleteAllRecords()
@@ -226,6 +261,138 @@ struct SettingView: View {
         
         self.exportDocument = CSVDocument(text: csvString)
         self.isShowingExporter = true
+    }
+    
+    private func importCSV(from url: URL) {
+        guard url.startAccessingSecurityScopedResource() else {
+            showImportResult(message: "ファイルへのアクセス権限がありません")
+            return
+        }
+        defer { url.stopAccessingSecurityScopedResource() }
+        
+        do {
+            let data = try Data(contentsOf: url)
+            guard let contentString = String(data: data, encoding: .utf8) else {
+                showImportResult(message: "ファイルを文字コードUTF-8として読み込めませんでした")
+                return
+            }
+            
+            let rows = parseCSV(contentString)
+            if rows.isEmpty {
+                showImportResult(message: "有効なデータ行が見つかりませんでした")
+                return
+            }
+            
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy/MM/dd"
+            
+            var successCount = 0
+            var skipCount = 0
+            
+            let existingIDs = Set(records.map { $0.id.uuidString })
+            
+            for fields in rows {
+                if fields.first == "ID" || fields.count < 14 { continue }
+                
+                let idString = fields[0]
+                
+                if existingIDs.contains(idString) {
+                    skipCount += 1
+                    continue
+                }
+                
+                guard let uuid = UUID(uuidString: idString) else { continue }
+                
+                let situationRaw = fields[1]
+                let situation: Situation = (situationRaw == "売却") ? .sell : .buy
+                let stockName = fields[2]
+                let tickerCode = fields[3]
+                let quantity = Int(fields[4]) ?? 100
+                let buyDate = dateFormatter.date(from: fields[5])
+                let buyPrice = Double(fields[6]) ?? 0.0
+                let sellDate = dateFormatter.date(from: fields[7])
+                let sellPrice = Double(fields[8]) ?? 0.0
+                
+                let buyReason = BuyReason.allCases.first { $0.localizedName(customNames: customBuyReasons) == fields[10] } ?? .others
+                let sellReason = SellReason.allCases.first { $0.localizedName(customNames: customSellReasons) == fields[11] } ?? .others
+                
+                let note = fields[12]
+                let reflection = fields[13]
+                
+                let record = Record(
+                    id: uuid,
+                    stockName: stockName,
+                    tickerCode: tickerCode,
+                    buyDate: buyDate,
+                    sellDate: sellDate,
+                    buyPrice: buyPrice,
+                    sellPrice: sellPrice,
+                    quantity: quantity,
+                    situation: situation,
+                    buyReason: buyReason,
+                    sellReason: sellReason,
+                    note: note,
+                    reflection: reflection
+                )
+                
+                modelContext.insert(record)
+                successCount += 1
+            }
+            
+            try modelContext.save()
+            showImportResult(message: "\(successCount)件の取引を正常にインポートしました。\(skipCount > 0 ? "\n(既に存在する \(skipCount) 件のデータはスキップされました)" : "")")
+        } catch {
+            showImportResult(message: "インポートエラー：\(error.localizedDescription)")
+        }
+    }
+    
+    private func parseCSV(_ text: String) -> [[String]] {
+        var result: [[String]] = []
+        var currentFields: [String] = []
+        var currentField = ""
+        var inQuotes = false
+        
+        let characters = Array(text)
+        var index = 0
+        
+        while index < characters.count {
+            let char = characters[index]
+            
+            if char == "\"" {
+                if inQuotes && index + 1 < characters.count && characters[index + 1] == "\"" {
+                    currentField.append("\"")
+                    index += 1
+                } else {
+                    inQuotes.toggle()
+                }
+            } else if char == "," && !inQuotes {
+                currentFields.append(currentField)
+                currentField = ""
+            } else if (char == "\n" || char == "\r") && !inQuotes {
+                if char == "\r" && index + 1 < characters.count && characters[index + 1] == "\n" {
+                    index += 1
+                }
+                currentFields.append(currentField)
+                result.append(currentFields)
+                currentFields = []
+                currentField = ""
+            } else {
+                currentField.append(char)
+            }
+            index += 1
+        }
+        
+        if !currentField.isEmpty || !currentFields.isEmpty {
+            currentFields.append(currentField)
+            result.append(currentFields)
+        }
+        
+        return result
+    }
+    
+    private func showImportResult(message: String) {
+        self.importAlertMessage = message
+        self.isShowingImportAlert = true
     }
         
     private func deleteAllRecords() {

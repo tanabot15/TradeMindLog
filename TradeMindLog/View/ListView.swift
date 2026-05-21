@@ -68,6 +68,9 @@ struct ListView: View {
             .background(Color(.systemBackground))
             .navigationTitle("Records")
             .searchable(text: $searchText, prompt: "銘柄名またはコードで検索")
+            .onChange(of: selectedSituation) { oldValue, newValue in
+                searchText = ""
+            }
             .toolbar {
                 Button("Add Record", systemImage: "plus") {
                     createNewRecord()

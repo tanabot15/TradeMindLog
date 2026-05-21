@@ -18,6 +18,13 @@ struct AddRecordView: View {
     @Bindable var record: Record
     let isNew: Bool
     
+    enum Field: Hashable {
+        case stockName
+        case tickerCode
+        case price
+    }
+    @FocusState private var focusedField: Field?
+    
     var body: some View {
         NavigationStack {
             Form {
@@ -31,7 +38,12 @@ struct AddRecordView: View {
                 
                 Section("株式情報") {
                     TextField("Stock Name", text: $record.stockName)
+                        .focused($focusedField, equals: .stockName)
+                        .submitLabel(.next)
+                    
                     TextField("Ticker Code", text: $record.tickerCode)
+                        .focused($focusedField, equals: .tickerCode)
+                        .submitLabel(.next)
                 }
                 
                 Section("取引日") {
@@ -52,6 +64,7 @@ struct AddRecordView: View {
                             Text("購入額：")
                             Spacer()
                             TextField("0", value: $record.buyPrice, format: .number)
+                                .focused($focusedField, equals: .price)
                                 .keyboardType(.decimalPad)
                         }
                     } else {
@@ -59,6 +72,7 @@ struct AddRecordView: View {
                             Text("売却額：")
                             Spacer()
                             TextField("0", value: $record.sellPrice, format: .number)
+                                .focused($focusedField, equals: .price)
                                 .keyboardType(.decimalPad)
                         }
                     }
@@ -120,9 +134,17 @@ struct AddRecordView: View {
                 }
             }
             .navigationTitle(isNew ? "Recordの追加" : "Recorの確認・編集")
+            .onSubmit {
+                switch focusedField {
+                case .stockName:
+                    focusedField = .tickerCode
+                default:
+                    focusedField = nil
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(isNew ? "Save" : "Done") {
+                    Button(isNew ? "保存" : "完了") {
                         do {
                             try modelContext.save()
                             dismiss()
@@ -134,12 +156,20 @@ struct AddRecordView: View {
                 }
                 if isNew {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel") {
+                        Button("キャンセル") {
                             modelContext.delete(record)
                             try? modelContext.save()
                             dismiss()
                         }
                     }
+                }
+                
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("完了") {
+                        focusedField = nil
+                    }
+                    .bold()
                 }
             }
         }
