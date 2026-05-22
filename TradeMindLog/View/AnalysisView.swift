@@ -13,12 +13,39 @@ struct AnalysisView: View {
     @Query var records: [Record]
     
     @State private var selectedSituation = "購入"
+    @State private var selectedTimeFilter: TimeFilter = .all
     
     @AppStorage("customBuyReasons") private var customBuyReasons: [String] = []
     @AppStorage("customSellReasons") private var customSellReasons: [String] = []
     
+    enum TimeFilter: String, CaseIterable, Identifiable {
+        case all = "全期間"
+        case thisYear = "今年"
+        case thisMonth = "今月"
+        
+        var id: String { self.rawValue }
+    }
+    
     var filteredRecords: [Record] {
-        records.filter { $0.situation.rawValue == selectedSituation}
+        let situationRecords = records.filter { $0.situation.rawValue == selectedSituation }
+        
+        let now = Date()
+        let calendar = Calendar.current
+        
+        return situationRecords.filter { record in
+            guard let targetDate = (record.situation == .buy ? record.buyDate : record.sellDate) else {
+                return false
+            }
+            
+            switch selectedTimeFilter {
+            case .all:
+                return true
+            case .thisYear:
+                return calendar.isDate(targetDate, equalTo: now, toGranularity: .year)
+            case .thisMonth:
+                return calendar.isDate(targetDate, equalTo: now, toGranularity: .month)
+            }
+        }
     }
     
     struct ReasonStat: Identifiable {
@@ -56,27 +83,46 @@ struct AnalysisView: View {
         }.sorted { $0.count > $1.count}
     }
     
+    var currentStats: [ReasonStat] {
+        if selectedSituation == "購入" {
+            return buyReasonStats
+        } else {
+            return sellReasonStats
+        }
+    }
+    
     let chartColors: [Color] = [
         .teal, .orange, .green, .cyan, .yellow, .indigo, .mint
     ]
     
     var body: some View {
         NavigationStack {
-            Picker("Buy or Sell", selection: $selectedSituation) {
-                Text("購入").tag("購入")
-                Text("売却").tag("売却")
+            VStack {
+                Picker("Buy or Sell", selection: $selectedSituation) {
+                    Text("購入").tag("購入")
+                    Text("売却").tag("売却")
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal)
+                .padding(.top, 10)
+                
+                Picker("Time Filter", selection: $selectedTimeFilter) {
+                    ForEach(TimeFilter.allCases) { filter in
+                        Text(filter.rawValue).tag(filter)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal)
+                .padding(.vertical, 10)
             }
-            .pickerStyle(.segmented)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-
+            
             ScrollView {
                 VStack(spacing: 12) {
                     if filteredRecords.isEmpty {
                         ContentUnavailableView(
-                            "Recordがありません",
+                            "表示できるRecordがありません",
                             systemImage: "chart.pie",
-                            description: Text("Recordが追加されると、あなたの投資における売買傾向が視覚化されます")
+                            description: Text("\(selectedTimeFilter.rawValue)の\(selectedSituation)取引が存在しません")
                         )
                         .padding(.top, 60)
                     } else {
@@ -113,7 +159,7 @@ struct AnalysisView: View {
                                     range: chartColors
                                 )
                                 .chartLegend(.hidden)
-                                .frame(height: 240)
+                                .frame(height: 280)
                                 
                                 VStack(spacing: 2) {
                                     Text("TOTAL")
@@ -167,6 +213,7 @@ struct AnalysisView: View {
                                     }
                                 }
                             }
+                            .padding(.horizontal)
                         }
                     }
                 }
