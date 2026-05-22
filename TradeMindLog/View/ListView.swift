@@ -35,15 +35,6 @@ struct ListView: View {
         }
     }
     
-    // delete afterwords
-    var buyRecords: [Record] {
-        records.filter { $0.situation.rawValue == "購入" }
-    }
-    
-    var sellRecords: [Record] {
-        records.filter { $0.situation.rawValue == "売却" }
-    }
-    
     var body: some View {
         NavigationStack {
             VStack {
@@ -84,11 +75,28 @@ struct ListView: View {
     
     @ViewBuilder
     private func emptyStateView(for situation: String) -> some View {
-        ContentUnavailableView(
-            "最初の\(situation)取引を記録しましょう",
-            systemImage: situation == "購入" ? "tray.and.arrow.down" : "tray.and.arrow.up",
-            description: Text("右上の「+」ボタンから、投資した銘柄の情報を入力して記録を始めましょう。")
-        )
+        ContentUnavailableView {
+            Label(
+                "最初の\(situation)取引を記録しましょう",
+                systemImage: situation == "購入" ? "tray.and.arrow.down" : "tray.and.arrow.up"
+            )
+        } description: {
+            Text("投資した銘柄の情報を入力して、あなたのトレードの記録を始めましょう")
+        } actions: {
+            Button(action: {
+                createNewRecord()
+            }) {
+                HStack {
+                    Image(systemName: "plus.circle.fill")
+                    Text("\(situation)の記録を追加")
+                }
+                .bold()
+                .font(.headline)
+                .padding()
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(situation == "購入" ? .blue.opacity(0.8) : .red.opacity(0.8))
+        }
     }
     
     @ViewBuilder
@@ -145,7 +153,7 @@ struct ListView: View {
             buyPrice: 0.0,
             sellPrice: 0.0,
             quantity: 100,
-            situation: .buy,
+            situation: selectedSituation == "購入" ? .buy : .sell,
             buyReason: .others,
             sellReason: .others,
             note: "",
