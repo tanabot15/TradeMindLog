@@ -37,40 +37,51 @@ struct ListView: View {
     
     var body: some View {
         NavigationStack {
-            VStack {
-                Picker("Buy or Sell", selection: $selectedSituation) {
-                    Text("購入").tag("購入")
-                    Text("売却").tag("売却")
-                }
-                .pickerStyle(.segmented)
-                .padding(.horizontal, 10)
-                .padding(.bottom, 5)
-                
-                if currentSituationRecords.isEmpty {
+            if currentSituationRecords.isEmpty {
+                VStack(spacing: 0) {
+                    pickerView
                     emptyStateView(for: selectedSituation)
-                } else if filteredRecords.isEmpty {
-                    ContentUnavailableView.search(text: searchText)
-                } else {
+                }
+                .navigationTitle("Records")
+                .toolbar {
+                    Button("Add Record", systemImage: "plus") {
+                        createNewRecord()
+                    }
+                }
+                .sheet(item: $recordToCreate) { newRecord in
+                    AddRecordView(record: newRecord, isNew: true)
+                }
+            } else {
+                VStack(spacing: 0) {
+                    pickerView
                     recordListView(for: filteredRecords)
+                        .scrollContentBackground(.hidden)
+                        .background(Color(.systemBackground))
+                        .navigationTitle("Records")
+                        .searchable(text: $searchText, prompt: "銘柄名またはコードで検索")
+                        .onChange(of: selectedSituation) { oldValue, newValue in
+                            searchText = ""
+                        }
+                        .toolbar {
+                            Button("Add Record", systemImage: "plus") {
+                                createNewRecord()
+                            }
+                        }
+                        .sheet(item: $recordToCreate) { newRecord in
+                            AddRecordView(record: newRecord, isNew: true)
+                        }
                 }
-            }
-            
-            .scrollContentBackground(.hidden)
-            .background(Color(.systemBackground))
-            .navigationTitle("Records")
-            .searchable(text: $searchText, prompt: "銘柄名またはコードで検索")
-            .onChange(of: selectedSituation) { oldValue, newValue in
-                searchText = ""
-            }
-            .toolbar {
-                Button("Add Record", systemImage: "plus") {
-                    createNewRecord()
-                }
-            }
-            .sheet(item: $recordToCreate) { newRecord in
-                AddRecordView(record: newRecord, isNew: true)
             }
         }
+    }
+    
+    private var pickerView: some View {
+        Picker("Buy or Sell", selection: $selectedSituation) {
+            Text("購入").tag("購入")
+            Text("売却").tag("売却")
+        }
+        .pickerStyle(.segmented)
+        .padding()
     }
     
     @ViewBuilder
@@ -102,36 +113,57 @@ struct ListView: View {
     @ViewBuilder
     private func recordListView(for filterRecords: [Record]) -> some View {
         List {
-            ForEach(filterRecords) { record in
-                NavigationLink(destination: AddRecordView(record: record, isNew: false)) {
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text(record.tickerCode)
-                                .font(.footnote)
-                            Text(record.stockName)
-                                .font(.title2)
-                                .fontWeight(.semibold)
-                        }
-                        
-                        Spacer()
-                        
-                        VStack(alignment: .trailing) {
-                            Text("理由：\(record.situation == .buy ? record.buyReason.localizedName(customNames: customBuyReasons) : record.sellReason.localizedName(customNames: customSellReasons))")
-                                .font(.headline)
-                            HStack {
-                                Text("\(record.quantity)株")
-                                Text(" / ")
-                                Text("\(record.situation == .buy ? record.buyPrice : record.sellPrice, specifier: "%.1f") 円")
+            if filterRecords.isEmpty {
+                ContentUnavailableView.search(text: searchText)
+                    .listRowBackground(Color.clear)
+            } else {
+                ForEach(filterRecords) { record in
+                    NavigationLink(destination: AddRecordView(record: record, isNew: false)) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 0) {
+                                Text(record.tickerCode)
+                                    .font(.footnote)
+                                Text(record.stockName)
+                                    .font(.title2)
+                                    .fontWeight(.semibold)
+                                HStack {
+                                    Text(" \(record.quantity)株")
+                                    Text("/")
+                                    Text("\(record.situation == .buy ? record.buyPrice : record.sellPrice, specifier: "%.0f") 円")
+                                }
+                                .font(.callout)
                             }
-                            .font(.callout)
+                            
+                            Spacer()
+                            
+                            VStack(alignment: .trailing, spacing: 8) {
+                                Text("理由：\(record.situation == .buy ? record.buyReason.localizedName(customNames: customBuyReasons) : record.sellReason.localizedName(customNames: customSellReasons))")
+                                    .font(.headline)
+                                
+                                HStack(spacing: 2) {
+                                    Text("評価：")
+                                        .font(.headline)
+                                    
+                                    if record.rating > 0 {
+                                        ForEach(1...5, id: \.self) { star in
+                                            Image(systemName: star <= record.rating ? "star.fill" : "star")
+                                                .foregroundColor(.yellow)
+                                                .font(.caption2)
+                                        }
+                                    } else {
+                                        Text("未実施")
+                                            .font(.subheadline)
+                                            .italic()
+                                    }
+                                }
+                            }
                         }
                     }
-                    
+                    .listRowBackground(selectedSituation == "購入" ? Color.blue.opacity(0.40) : Color.red.opacity(0.40))
                 }
-                .listRowBackground(selectedSituation == "購入" ? Color.blue.opacity(0.40) : Color.red.opacity(0.40))
-            }
-            .onDelete { offsets in
-                deleteRecords(at: offsets, from: filterRecords)
+                .onDelete { offsets in
+                    deleteRecords(at: offsets, from: filterRecords)
+                }
             }
         }
     }
@@ -157,6 +189,7 @@ struct ListView: View {
             buyReason: .others,
             sellReason: .others,
             note: "",
+            rating: 0,
             reflection: ""
         )
         modelContext.insert(newRecord)

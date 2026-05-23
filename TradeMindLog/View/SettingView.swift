@@ -172,7 +172,7 @@ private extension SettingView {
                 Text("Version")
                 Spacer()
                 // change when updating
-                Text("1.10")
+                Text("2.0")
                     .foregroundColor(.secondary)
             }
             

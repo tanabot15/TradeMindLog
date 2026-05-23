@@ -96,28 +96,26 @@ struct AnalysisView: View {
     ]
     
     var body: some View {
-        NavigationStack {
-            VStack {
-                Picker("Buy or Sell", selection: $selectedSituation) {
-                    Text("購入").tag("購入")
-                    Text("売却").tag("売却")
-                }
-                .pickerStyle(.segmented)
-                .padding(.horizontal)
-                .padding(.top, 10)
-                
-                Picker("Time Filter", selection: $selectedTimeFilter) {
-                    ForEach(TimeFilter.allCases) { filter in
-                        Text(filter.rawValue).tag(filter)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .padding(.horizontal)
-                .padding(.vertical, 10)
-            }
-            
+        NavigationStack {            
             ScrollView {
                 VStack(spacing: 12) {
+                    Picker("Buy or Sell", selection: $selectedSituation) {
+                        Text("購入").tag("購入")
+                        Text("売却").tag("売却")
+                    }
+                    .pickerStyle(.segmented)
+                    .padding(.horizontal)
+                    .padding(.top, 10)
+                    
+                    Picker("Time Filter", selection: $selectedTimeFilter) {
+                        ForEach(TimeFilter.allCases) { filter in
+                            Text(filter.rawValue).tag(filter)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .padding(.horizontal)
+                    .padding(.vertical, 10)
+                    
                     if filteredRecords.isEmpty {
                         ContentUnavailableView(
                             "表示できるRecordがありません",

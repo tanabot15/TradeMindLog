@@ -17,6 +17,7 @@ struct AddRecordView: View {
             
     @Bindable var record: Record
     let isNew: Bool
+    @State private var isShowingDeleteAlert = false
     
     enum Field: Hashable {
         case stockName
@@ -28,25 +29,51 @@ struct AddRecordView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section() {
+                if !isNew {
+                    Section("トレードの振り返り") {
+                        HStack {
+                            Text("評価：")
+                            HStack(spacing: 8) {
+                                ForEach(1...5, id: \.self) { star in
+                                    Image(systemName: star <= record.rating ? "star.fill" : "star")
+                                        .foregroundColor(.yellow)
+                                        .font(.title3)
+                                        .onTapGesture {
+                                            record.rating = star
+                                        }
+                                }
+                            }
+                        }
+                        .padding(.vertical, 4)
+                        
+                        TextEditor(text: $record.reflection)
+                            .frame(minHeight: 80)
+                            .overlay(alignment: .topLeading) {
+                                if record.reflection.isEmpty {
+                                    Text("一定期間が経ってからの気付きや、反省点、詳細な評価、今後の学習ポイントなどを記述しましょう")
+                                        .foregroundColor(.gray)
+                                }
+                            }
+                    }
+                }
+                
+                Section("株式情報") {
+                    TextField("株式名", text: $record.stockName)
+                        .focused($focusedField, equals: .stockName)
+                        .submitLabel(.next)
+                    
+                    TextField("銘柄コード", text: $record.tickerCode)
+                        .focused($focusedField, equals: .tickerCode)
+                        .submitLabel(.next)
+                }
+                
+                Section("取引情報") {
                     Picker("Situation", selection: $record.situation) {
                         Text("購入").tag(Situation.buy)
                         Text("売却").tag(Situation.sell)
                     }
                     .pickerStyle(SegmentedPickerStyle())
-                }
-                
-                Section("株式情報") {
-                    TextField("Stock Name", text: $record.stockName)
-                        .focused($focusedField, equals: .stockName)
-                        .submitLabel(.next)
                     
-                    TextField("Ticker Code", text: $record.tickerCode)
-                        .focused($focusedField, equals: .tickerCode)
-                        .submitLabel(.next)
-                }
-                
-                Section("取引日") {
                     if record.situation == .buy {
                         DatePicker("購入日", selection: Binding(
                             get: { record.buyDate ?? Date() },
@@ -98,11 +125,11 @@ struct AddRecordView: View {
                     }
                     
                     TextEditor(text: $record.note)
+                        .frame(minHeight: 80)
                         .overlay(alignment: .topLeading) {
                             if record.note.isEmpty {
-                                Text("なぜ売買したのか...感情や判断をメモ")
+                                Text("なぜ売買したのか、その時の感情や判断をメモしましょう")
                                     .foregroundColor(.gray)
-                                    .padding(8)
                             }
                         }
                 }
@@ -110,16 +137,16 @@ struct AddRecordView: View {
                 if !isNew {
                     Section {
                         Button(role: .destructive) {
-                            modelContext.delete(record)
-                            try? modelContext.save()
-                            dismiss()
+                            isShowingDeleteAlert = true
                         } label: {
                             Text("この記録を削除")
                                 .frame(maxWidth: .infinity)
                         }
                     }
                 }
+                
             }
+            .navigationTitle(isNew ? "Recordの追加" : "Recordの評価・編集")
             .onChange(of: record.situation) { oldValue, newValue in
                 if newValue == .buy {
                     if let savedDate = record.sellDate {
@@ -133,7 +160,16 @@ struct AddRecordView: View {
                     record.buyDate = nil
                 }
             }
-            .navigationTitle(isNew ? "Recordの追加" : "Recorの確認・編集")
+            .alert("この記録を削除しますか？", isPresented: $isShowingDeleteAlert) {
+                Button("キャンセル", role: .cancel) { }
+                Button("削除する", role: .destructive) {
+                    modelContext.delete(record)
+                    try? modelContext.save()
+                    dismiss()
+                }
+            } message: {
+                Text("この操作は取り消せません。この取引記録が完全に削除されます。")
+            }
             .onSubmit {
                 switch focusedField {
                 case .stockName:
@@ -192,7 +228,8 @@ struct AddRecordView: View {
         situation: .buy,
         buyReason: .highProfitMargin,
         sellReason: .profitTaking,
-        note: "For Preview",
+        note: "memomemomemo",
+        rating: 3,
         reflection: ""
     )
     

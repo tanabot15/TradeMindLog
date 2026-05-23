@@ -62,6 +62,7 @@ struct CalendarView: View {
                     recordSection(title: "売却Records", records: filteredRecords.sell, color: .red)
                 }
             }
+            
             .scrollContentBackground(.hidden)
             .background(Color(.systemBackground))
             .navigationTitle("Calendar")
@@ -84,30 +85,44 @@ struct CalendarView: View {
                 ForEach(records) { record in
                     NavigationLink(destination: AddRecordView(record: record, isNew: false)) {
                         HStack {
-                            VStack(alignment: .leading) {
+                            VStack(alignment: .leading, spacing: 0) {
                                 Text(record.tickerCode)
                                     .font(.footnote)
                                 Text(record.stockName)
-                                    .font(.title3).fontWeight(.semibold)
+                                    .font(.title2)
+                                    .fontWeight(.semibold)
+                                HStack {
+                                    Text(" \(record.quantity)株")
+                                    Text("/")
+                                    Text("\(record.situation == .buy ? record.buyPrice : record.sellPrice, specifier: "%.0f") 円")
                                 }
+                                .font(.callout)
+                            }
                             
                             Spacer()
                             
-                            VStack(alignment: .trailing) {
-                                let reason = record.situation == .buy ? record.buyReason.localizedName(customNames: customBuyReasons) : record.buyReason.localizedName(customNames: customSellReasons)
-                                let price = record.situation == .buy ? record.buyPrice : record.sellPrice
-                                        
-                                Text("理由：\(reason)").font(.subheadline).bold()
-                                HStack(spacing: 4) {
-                                    Text("\(record.quantity)株")
-                                    Text("/")
-                                    Text("\(price, specifier: "%.1f")円")
+                            VStack(alignment: .trailing, spacing: 8) {
+                                Text("理由：\(record.situation == .buy ? record.buyReason.localizedName(customNames: customBuyReasons) : record.sellReason.localizedName(customNames: customSellReasons))")
+                                    .font(.headline)
+                                
+                                HStack(spacing: 2) {
+                                    Text("評価：")
+                                        .font(.headline)
+                                    
+                                    if record.rating > 0 {
+                                        ForEach(1...5, id: \.self) { star in
+                                            Image(systemName: star <= record.rating ? "star.fill" : "star")
+                                                .foregroundColor(.yellow)
+                                                .font(.caption2)
+                                        }
+                                    } else {
+                                        Text("未実施")
+                                            .font(.subheadline)
+                                            .italic()
+                                    }
                                 }
-                                .font(.caption)
-                                .foregroundColor(.secondary)
                             }
                         }
-                        .padding(.vertical, 2)
                     }
                     .listRowBackground(color.opacity(0.40))
                 }
@@ -231,6 +246,7 @@ struct CalendarView: View {
             buyReason: .others,
             sellReason: .others,
             note: "",
+            rating: 0,
             reflection: ""
         )
         modelContext.insert(newRecord)
@@ -241,5 +257,5 @@ struct CalendarView: View {
 #Preview {
     CalendarView()
         .modelContainer(previewContainer)
-//        .preferredColorScheme(.dark)
+        .preferredColorScheme(.dark)
 }

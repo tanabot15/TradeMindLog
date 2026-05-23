@@ -53,6 +53,7 @@ class Record {
     var sellReason: SellReason
     var situation: Situation
     var note: String
+    var rating: Int
     var reflection: String
     
     init(
@@ -68,6 +69,7 @@ class Record {
         buyReason: BuyReason,
         sellReason: SellReason,
         note: String,
+        rating: Int = 0,
         reflection: String
     ) {
         self.id = id
@@ -82,6 +84,7 @@ class Record {
         self.buyReason = buyReason
         self.sellReason = sellReason
         self.note = note
+        self.rating = rating
         self.reflection = reflection
     }
 }
