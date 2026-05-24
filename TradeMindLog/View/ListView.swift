@@ -20,15 +20,27 @@ struct ListView: View {
     
     @State private var searchText = ""
     
+    @State private var showUnratedOnly = false
+    
     var currentSituationRecords: [Record] {
         records.filter { $0.situation.rawValue == selectedSituation}
     }
     
+    var unratedCount: Int {
+        currentSituationRecords.filter { $0.rating == 0 }.count
+    }
+    
     var filteredRecords: [Record] {
+        var baseRecords = currentSituationRecords
+        
+        if showUnratedOnly {
+            baseRecords = baseRecords.filter { $0.rating == 0 }
+        }
+        
         if searchText.isEmpty {
-            return currentSituationRecords
+            return baseRecords
         } else {
-            return currentSituationRecords.filter { record in
+            return baseRecords.filter { record in
                 record.stockName.localizedStandardContains(searchText) ||
                 record.tickerCode.localizedStandardContains(searchText)
             }
@@ -53,6 +65,7 @@ struct ListView: View {
                 }
             } else {
                 VStack(spacing: 0) {
+                    notificationBannerView
                     pickerView
                     recordListView(for: filteredRecords)
                         .scrollContentBackground(.hidden)
@@ -61,6 +74,7 @@ struct ListView: View {
                         .searchable(text: $searchText, prompt: "銘柄名またはコードで検索")
                         .onChange(of: selectedSituation) { oldValue, newValue in
                             searchText = ""
+                            showUnratedOnly = false
                         }
                         .toolbar {
                             Button("Add Record", systemImage: "plus") {
@@ -71,6 +85,38 @@ struct ListView: View {
                             AddRecordView(record: newRecord, isNew: true)
                         }
                 }
+            }
+        }
+    }
+    
+    // Notification Banner View
+    @ViewBuilder
+    private var notificationBannerView: some View {
+        if unratedCount > 0 {
+            Button(action: {
+                withAnimation {
+                    showUnratedOnly.toggle()
+                }
+            }) {
+                HStack {
+                    Image(systemName: showUnratedOnly ? "exclamationmark.triangle.fill" : "exclamationmark.triangle")
+                        .foregroundColor(.orange)
+                    
+                    Text(showUnratedOnly ? "振り返り待ちの \(unratedCount) 件を表示中（タップで解除）" : "振り返り待ちのレコードが \(unratedCount) 件あります")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                    
+                    Spacer()
+                    
+                    Image(systemName: showUnratedOnly ? "xmark.circle.fill" : "chevron.right")
+                        .foregroundColor(.secondary)
+                        .font(.footnote)
+                }
+                .padding()
+                .background(showUnratedOnly ? Color.orange.opacity(0.2) : Color(.secondarySystemBackground))
+                .cornerRadius(8)
+                .padding(.horizontal)
             }
         }
     }
@@ -114,8 +160,17 @@ struct ListView: View {
     private func recordListView(for filterRecords: [Record]) -> some View {
         List {
             if filterRecords.isEmpty {
-                ContentUnavailableView.search(text: searchText)
+                if showUnratedOnly {
+                    ContentUnavailableView {
+                        Label("振り返りまちはありません", systemImage: "checkmark.circle")
+                    } description: {
+                        Text("すべての\(selectedSituation)レコードの振り返りが完了しています")
+                    }
                     .listRowBackground(Color.clear)
+                } else {
+                    ContentUnavailableView.search(text: searchText)
+                        .listRowBackground(Color.clear)
+                }
             } else {
                 ForEach(filterRecords) { record in
                     NavigationLink(destination: AddRecordView(record: record, isNew: false)) {

@@ -66,7 +66,7 @@ class SettingViewModel: ObservableObject {
     
     // create csv export data
     func generateAndExportCSV(records: [Record], customBuyReasons: [String], customSellReasons: [String]) {
-        var csvString = "ID,状況,銘柄名,ティッカーコード,数量,購入日,購入価格,売却日,売却価格,購入理由,売却理由,ノート,振り返り\n"
+        var csvString = "ID,状況,銘柄名,ティッカーコード,数量,購入日,購入価格,売却日,売却価格,購入理由,売却理由,ノート,評価,振り返り\n"
         
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy/MM/dd"
@@ -86,9 +86,10 @@ class SettingViewModel: ObservableObject {
             let sellReason = record.sellReason.localizedName(customNames: customSellReasons)
             
             let note = "\"\(record.note.replacingOccurrences(of: "\"", with: "\"\""))\""
+            let rating = record.rating
             let reflection = "\"\(record.reflection.replacingOccurrences(of: "\"", with: "\"\""))\""
             
-            let row = "\(id),\(situation),\(stockName),\(ticker),\(qty),\(buyDateStr),\(buyPrice),\(sellDateStr),\(sellPrice),\(buyReason),\(sellReason),\(note),\(reflection)\n"
+            let row = "\(id),\(situation),\(stockName),\(ticker),\(qty),\(buyDateStr),\(buyPrice),\(sellDateStr),\(sellPrice),\(buyReason),\(sellReason),\(note),\(rating),\(reflection)\n"
             csvString.append(row)
         }
         
@@ -151,7 +152,8 @@ class SettingViewModel: ObservableObject {
                 let sellReason = SellReason.allCases.first { $0.localizedName(customNames: customSellReasons) == fields[11] } ?? .others
                 
                 let note = fields[12]
-                let reflection = fields[13]
+                let rating = Int(fields[13]) ?? 0
+                let reflection = fields[14]
                 
                 let record = Record(
                     id: uuid,
@@ -166,6 +168,7 @@ class SettingViewModel: ObservableObject {
                     buyReason: buyReason,
                     sellReason: sellReason,
                     note: note,
+                    rating: rating,
                     reflection: reflection
                 )
                 
