@@ -246,7 +246,7 @@ struct ReasonEditSheetView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
+                    Button("保存") {
                         dismiss()
                     }
                 }
