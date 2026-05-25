@@ -20,7 +20,18 @@ struct SettingView: View {
     @AppStorage("customBuyReasons") private var customBuyReasons: [String] = BuyReason.allCases.map { $0.rawValue }
     @AppStorage("customSellReasons") private var customSellReasons: [String] = SellReason.allCases.map { $0.rawValue }
     
-    @State private var isShowingEditSheet = false
+    static let defaultReflectionTemplate = """
+        【1. 当初の想定と違った点】
+        
+        【2. 今回の気付き・反省点】
+        
+        【3. 次回にどう活かすか】
+        
+        """
+    @AppStorage("reflectionTemplate") private var reflectionTemplate: String = SettingView.defaultReflectionTemplate
+    
+    @State private var isShowingReasonEditSheet = false
+    @State private var isShowingTemplateEditSheet = false
     
     var body: some View {
         NavigationStack {
@@ -33,10 +44,15 @@ struct SettingView: View {
             }
             .navigationTitle("Setting")
             // sheet modifier
-            .sheet(isPresented: $isShowingEditSheet) {
+            .sheet(isPresented: $isShowingReasonEditSheet) {
                 ReasonEditSheetView(
                     customBuyReasons: $customBuyReasons,
                     customSellReasons: $customSellReasons
+                )
+            }
+            .sheet(isPresented: $isShowingTemplateEditSheet) {
+                TemplateEditSheetView(
+                    reflectionTemplate: $reflectionTemplate
                 )
             }
             .fileExporter(
@@ -86,7 +102,7 @@ struct SettingView: View {
 // MARK: Subviews (Section)
 private extension SettingView {
     
-    var experimentSection: some View {
+    private var experimentSection: some View {
         Section(header: Text("このアプリはこの実験から始まった...")) {
             Link(destination: viewModel.experimentURL) {
                 HStack {
@@ -100,7 +116,7 @@ private extension SettingView {
         }
     }
     
-    var generalSettingSection: some View {
+    private var generalSettingSection: some View {
         Section(header: Text("設定")) {
             Picker("週の始まり", selection: $firstWeekday) {
                 Text("日曜日").tag(1)
@@ -114,7 +130,7 @@ private extension SettingView {
             }
             
             Button {
-                isShowingEditSheet = true
+                isShowingReasonEditSheet = true
             } label: {
                 HStack {
                     Text("売買理由のカスタマイズ")
@@ -124,10 +140,22 @@ private extension SettingView {
                         .foregroundColor(.secondary)
                 }
             }
+            
+            Button {
+                isShowingTemplateEditSheet = true
+            } label: {
+                HStack {
+                    Text("振り返りテンプレートのカスタマイズ")
+                        .foregroundColor(.primary)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.secondary)
+                }
+            }
         }
     }
     
-    var dataManagementSection: some View {
+    private var dataManagementSection: some View {
         Section(header: Text("データ管理")) {
             Button {
                 viewModel.generateAndExportCSV(records: records, customBuyReasons: customBuyReasons, customSellReasons: customSellReasons)
@@ -166,7 +194,7 @@ private extension SettingView {
         }
     }
     
-    var appInfoSection: some View {
+    private var appInfoSection: some View {
         Section(header: Text("アプリ情報")) {
             HStack {
                 Text("Version")
@@ -200,7 +228,7 @@ private extension SettingView {
         }
     }
     
-    var footerSection: some View {
+    private var footerSection: some View {
         Section {
             Text("© 2026 Tanabot")
                 .font(.caption)
@@ -265,6 +293,54 @@ struct ReasonEditSheetView: View {
     private func resetToDefaultReasons() {
         self.customBuyReasons = BuyReason.allCases.map { $0.rawValue }
         self.customSellReasons = SellReason.allCases.map { $0.rawValue }
+    }
+}
+
+// MARK: TemplateEditSheetView
+struct TemplateEditSheetView: View {
+    @Environment(\.dismiss) private var dismiss
+    
+    @Binding var reflectionTemplate: String
+    @State private var isShowingResetAlert = false
+    
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section(header: Text("テンプレートの文章")) {
+                    TextEditor(text: $reflectionTemplate)
+                        .frame(minHeight: 180)
+                        .font(.body)
+                }
+                
+                Section(header: Text("データ管理")) {
+                    Button("売買理由を初期値に戻す", role: .destructive) {
+                        isShowingResetAlert = true
+                    }
+                    .foregroundColor(.red)
+                }
+            }
+            .navigationTitle("振り返りテンプレートのカスタマイズ")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("保存") {
+                        dismiss()
+                    }
+                }
+            }
+            .alert("テンプレートを初期値に戻しますか？", isPresented: $isShowingResetAlert) {
+                Button("キャンセル", role: .cancel) { }
+                Button("初期値に戻す", role: .destructive) {
+                    resetToDefaultTemplate()
+                }
+            } message: {
+                Text("カスタマイズされた売買理由がすべて初期状態の文言に戻ります。")
+            }
+        }
+    }
+    
+    private func resetToDefaultTemplate() {
+        self.reflectionTemplate = SettingView.defaultReflectionTemplate
     }
 }
 

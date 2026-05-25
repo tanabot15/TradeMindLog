@@ -19,12 +19,23 @@ struct AddRecordView: View {
     let isNew: Bool
     @State private var isShowingDeleteAlert = false
     
+    @State private var priceString: String = ""
+    
     enum Field: Hashable {
         case stockName
         case tickerCode
         case price
     }
     @FocusState private var focusedField: Field?
+    
+    @AppStorage("reflectionTemplate") private var reflectionTemplate: String = """
+        【1. 当初の想定と違った点】
+        
+        【2. 今回の気付き・反省点】
+        
+        【3. 次回にどう活かすか】
+        
+        """
     
     var body: some View {
         NavigationStack {
@@ -54,6 +65,17 @@ struct AddRecordView: View {
                                         .foregroundColor(.gray)
                                 }
                             }
+                        
+                        if record.reflection.isEmpty {
+                            Button(action: {
+                                insertTemplate()
+                            }) {
+                                Label("振り返りテンプレートを挿入", systemImage: "doc.text.badge.plus")
+                            }
+                            .buttonStyle(.bordered)
+                            .tint(.indigo)
+                            .padding(.vertical, 2)
+                        }
                     }
                 }
                 
@@ -86,24 +108,20 @@ struct AddRecordView: View {
                         ), displayedComponents: .date)
                     }
                     
-                    if record.situation == .buy {
-                        HStack {
-                            Text("購入額：")
-                            Spacer()
-                            TextField("0", value: $record.buyPrice, format: .number)
-                                .focused($focusedField, equals: .price)
-                                .keyboardType(.decimalPad)
-                        }
-                    } else {
-                        HStack {
-                            Text("売却額：")
-                            Spacer()
-                            TextField("0", value: $record.sellPrice, format: .number)
-                                .focused($focusedField, equals: .price)
-                                .keyboardType(.decimalPad)
-                        }
+                    HStack {
+                        Text(record.situation == .buy ? "購入額：" : "売却額：")
+                        Spacer()
+                        TextField("0", text: $priceString)
+                            .focused($focusedField, equals: .price)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing)
+                            .onChange(of: priceString) { oldValue, newValue in
+                                if oldValue == "0" && newValue.count > 1 {
+                                    priceString = String(newValue.dropFirst())
+                                }
+                            }
                     }
-
+                    
                     Stepper("株式数：    \(record.quantity)", value: $record.quantity, in: 100...100000, step: 100)
                 }
                 
@@ -147,6 +165,15 @@ struct AddRecordView: View {
                 
             }
             .navigationTitle(isNew ? "Recordの追加" : "Recordの評価・編集")
+            .onAppear {
+                let currentPrice = record.situation == .buy ? record.buyPrice : record.sellPrice
+                
+                if currentPrice == 0.0 {
+                    priceString = "0"
+                } else {
+                    priceString = currentPrice.truncatingRemainder(dividingBy: 1) == 0 ? "\(currentPrice.rounded())" : "\(currentPrice)"
+                }
+            }
             .onChange(of: record.situation) { oldValue, newValue in
                 if newValue == .buy {
                     if let savedDate = record.sellDate {
@@ -159,6 +186,9 @@ struct AddRecordView: View {
                     }
                     record.buyDate = nil
                 }
+                
+                let currentPrice = newValue == .buy ? record.buyPrice : record.sellPrice
+                priceString = currentPrice == 0.0 ? "0" : (currentPrice.truncatingRemainder(dividingBy: 1) == 0 ? "\(currentPrice.rounded())" : "\(currentPrice)")
             }
             .alert("この記録を削除しますか？", isPresented: $isShowingDeleteAlert) {
                 Button("キャンセル", role: .cancel) { }
@@ -208,6 +238,12 @@ struct AddRecordView: View {
                     .bold()
                 }
             }
+        }
+    }
+    
+    private func insertTemplate() {
+        if record.reflection.isEmpty {
+            record.reflection = reflectionTemplate
         }
     }
 }
