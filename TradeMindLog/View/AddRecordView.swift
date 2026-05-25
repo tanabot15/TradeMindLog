@@ -120,6 +120,7 @@ struct AddRecordView: View {
                                     priceString = String(newValue.dropFirst())
                                 }
                             }
+                            .padding(.horizontal)
                     }
                     
                     Stepper("株式数：    \(record.quantity)", value: $record.quantity, in: 100...100000, step: 100)
