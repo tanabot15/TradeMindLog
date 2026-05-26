@@ -191,7 +191,6 @@ private extension SettingView {
                 HStack {
                     Text("すべての記録を削除")
                     Spacer()
-                    Image(systemName: "trash")
                         .font(.subheadline)
                 }
             }
@@ -204,7 +203,7 @@ private extension SettingView {
                 Text("Version")
                 Spacer()
                 // change when updating
-                Text("2.2")
+                Text("2.3")
                     .foregroundColor(.secondary)
             }
             
