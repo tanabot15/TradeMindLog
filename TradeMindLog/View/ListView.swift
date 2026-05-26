@@ -14,16 +14,16 @@ struct ListView: View {
     
     @AppStorage("customBuyReasons") private var customBuyReasons: [String] = []
     @AppStorage("customSellReasons") private var customSellReasons: [String] = []
+    @AppStorage("showReflectionBanner") private var showReflectionBanner = true
     
-    @State private var selectedSituation = "購入"
+    @State private var selectedSituation: Situation = .buy
     @State private var recordToCreate: Record?
-    
     @State private var searchText = ""
     
     @State private var showUnratedOnly = false
     
     var currentSituationRecords: [Record] {
-        records.filter { $0.situation.rawValue == selectedSituation}
+        records.filter { $0.situation == selectedSituation}
     }
     
     var unratedCount: Int {
@@ -52,7 +52,7 @@ struct ListView: View {
             if currentSituationRecords.isEmpty {
                 VStack(spacing: 0) {
                     pickerView
-                    emptyStateView(for: selectedSituation)
+                    emptyStateView(for: selectedSituation.rawValue)
                 }
                 .navigationTitle("Records")
                 .toolbar {
@@ -92,7 +92,7 @@ struct ListView: View {
     // Notification Banner View
     @ViewBuilder
     private var notificationBannerView: some View {
-        if unratedCount > 0 {
+        if showReflectionBanner && unratedCount > 0 {
             Button(action: {
                 withAnimation {
                     showUnratedOnly.toggle()
@@ -122,9 +122,9 @@ struct ListView: View {
     }
     
     private var pickerView: some View {
-        Picker("Buy or Sell", selection: $selectedSituation) {
-            Text("購入").tag("購入")
-            Text("売却").tag("売却")
+        Picker("Situation", selection: $selectedSituation) {
+            Text("購入").tag(Situation.buy)
+            Text("売却").tag(Situation.sell)
         }
         .pickerStyle(.segmented)
         .padding()
@@ -164,7 +164,7 @@ struct ListView: View {
                     ContentUnavailableView {
                         Label("振り返りまちはありません", systemImage: "checkmark.circle")
                     } description: {
-                        Text("すべての\(selectedSituation)レコードの振り返りが完了しています")
+                        Text("すべての\(selectedSituation.rawValue)レコードの振り返りが完了しています")
                     }
                     .listRowBackground(Color.clear)
                 } else {
@@ -214,7 +214,7 @@ struct ListView: View {
                             }
                         }
                     }
-                    .listRowBackground(selectedSituation == "購入" ? Color.blue.opacity(0.40) : Color.red.opacity(0.40))
+                    .listRowBackground(selectedSituation == Situation.buy ? Color.blue.opacity(0.40) : Color.red.opacity(0.40))
                 }
                 .onDelete { offsets in
                     deleteRecords(at: offsets, from: filterRecords)
@@ -240,7 +240,7 @@ struct ListView: View {
             buyPrice: 0.0,
             sellPrice: 0.0,
             quantity: 100,
-            situation: selectedSituation == "購入" ? .buy : .sell,
+            situation: selectedSituation == Situation.buy ? .buy : .sell,
             buyReason: .others,
             sellReason: .others,
             note: "",

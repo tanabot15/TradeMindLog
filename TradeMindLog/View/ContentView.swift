@@ -24,7 +24,11 @@ struct ContentView: View {
             AnalysisView()
                 .tabItem {
                     Label("Analysis", systemImage: "chart.pie")
-                        .environment(\.symbolVariants, .none)
+                }
+            
+            EvaluationView()
+                .tabItem {
+                    Label("Evaluation", systemImage: "chart.bar.yaxis")
                 }
             
             SettingView()

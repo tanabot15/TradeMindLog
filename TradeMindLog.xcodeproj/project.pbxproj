@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D95970882FC52FEF000EB2D3 /* EvaluationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95970872FC52FEF000EB2D3 /* EvaluationView.swift */; };
 		D9A9394B2FC0264A00D3DFF3 /* SettingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9A9394A2FC0264A00D3DFF3 /* SettingViewModel.swift */; };
 		D9BBBAA32FB4A26600E05A0C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D9BBBA9F2FB4A26600E05A0C /* Assets.xcassets */; };
 		D9BBBAA42FB4A26600E05A0C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9BBBAA02FB4A26600E05A0C /* ContentView.swift */; };
@@ -22,6 +23,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D95970872FC52FEF000EB2D3 /* EvaluationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EvaluationView.swift; sourceTree = "<group>"; };
 		D9A9394A2FC0264A00D3DFF3 /* SettingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingViewModel.swift; sourceTree = "<group>"; };
 		D9BBBA912FB4A25400E05A0C /* TradeMindLog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TradeMindLog.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D9BBBA9F2FB4A26600E05A0C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -94,6 +96,7 @@
 				D9BBBAB02FB4A48700E05A0C /* CalendarView.swift */,
 				D9BBBAB22FB4A49E00E05A0C /* AddRecordView.swift */,
 				D9BBBAB42FB4A4A900E05A0C /* AnalysisView.swift */,
+				D95970872FC52FEF000EB2D3 /* EvaluationView.swift */,
 				D9BBBAB62FB4A4B700E05A0C /* SettingView.swift */,
 			);
 			path = View;
@@ -174,6 +177,7 @@
 			files = (
 				D9BBBAA42FB4A26600E05A0C /* ContentView.swift in Sources */,
 				D9BBBAB72FB4A4B700E05A0C /* SettingView.swift in Sources */,
+				D95970882FC52FEF000EB2D3 /* EvaluationView.swift in Sources */,
 				D9BBBAB32FB4A49E00E05A0C /* AddRecordView.swift in Sources */,
 				D9BBBAB12FB4A48700E05A0C /* CalendarView.swift in Sources */,
 				D9BBBAA52FB4A26600E05A0C /* TradeMindLogApp.swift in Sources */,

@@ -12,7 +12,7 @@ import Charts
 struct AnalysisView: View {
     @Query var records: [Record]
     
-    @State private var selectedSituation = "購入"
+    @State private var selectedSituation: Situation = .buy
     @State private var selectedTimeFilter: TimeFilter = .all
     
     @AppStorage("customBuyReasons") private var customBuyReasons: [String] = []
@@ -27,7 +27,7 @@ struct AnalysisView: View {
     }
     
     var filteredRecords: [Record] {
-        let situationRecords = records.filter { $0.situation.rawValue == selectedSituation }
+        let situationRecords = records.filter { $0.situation == selectedSituation }
         
         let now = Date()
         let calendar = Calendar.current
@@ -84,7 +84,7 @@ struct AnalysisView: View {
     }
     
     var currentStats: [ReasonStat] {
-        if selectedSituation == "購入" {
+        if selectedSituation == Situation.buy {
             return buyReasonStats
         } else {
             return sellReasonStats
@@ -99,9 +99,9 @@ struct AnalysisView: View {
         NavigationStack {            
             ScrollView {
                 VStack(spacing: 12) {
-                    Picker("Buy or Sell", selection: $selectedSituation) {
-                        Text("購入").tag("購入")
-                        Text("売却").tag("売却")
+                    Picker("Situation", selection: $selectedSituation) {
+                        Text("購入").tag(Situation.buy)
+                        Text("売却").tag(Situation.sell)
                     }
                     .pickerStyle(.segmented)
                     .padding(.horizontal)
@@ -120,19 +120,19 @@ struct AnalysisView: View {
                         ContentUnavailableView(
                             "表示できるRecordがありません",
                             systemImage: "chart.pie",
-                            description: Text("\(selectedTimeFilter.rawValue)の\(selectedSituation)取引が存在しません")
+                            description: Text("\(selectedTimeFilter.rawValue)の\(selectedSituation.rawValue)取引が存在しません")
                         )
                         .padding(.top, 60)
                     } else {
                         VStack {
-                            Text("\(selectedSituation)理由の比率")
+                            Text("\(selectedSituation.rawValue)理由の比率")
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                                 .bold()
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             
                             ZStack {
-                                Chart(selectedSituation == "購入" ? buyReasonStats : sellReasonStats) { stat in
+                                Chart(selectedSituation == Situation.buy ? buyReasonStats : sellReasonStats) { stat in
                                     SectorMark (
                                         angle: .value("count", stat.count),
                                         innerRadius: .ratio(0.5),
@@ -153,7 +153,7 @@ struct AnalysisView: View {
                                     }
                                 }
                                 .chartForegroundStyleScale(
-                                    domain: (selectedSituation == "購入" ? buyReasonStats : sellReasonStats).map { $0.reason },
+                                    domain: (selectedSituation == Situation.buy ? buyReasonStats : sellReasonStats).map { $0.reason },
                                     range: chartColors
                                 )
                                 .chartLegend(.hidden)
@@ -182,7 +182,7 @@ struct AnalysisView: View {
                                 .padding(.top, 10)
                             
                             VStack(spacing: 0) {
-                                let currentStats = selectedSituation == "購入" ? buyReasonStats : sellReasonStats
+                                let currentStats = selectedSituation == Situation.buy ? buyReasonStats : sellReasonStats
                                 
                                 ForEach(Array(currentStats.enumerated()), id: \.element.id) { index,stat in
                                     HStack(spacing: 12) {

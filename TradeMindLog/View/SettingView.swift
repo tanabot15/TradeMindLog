@@ -30,6 +30,8 @@ struct SettingView: View {
         """
     @AppStorage("reflectionTemplate") private var reflectionTemplate: String = SettingView.defaultReflectionTemplate
     
+    @AppStorage("showReflectionBanner") private var showReflectionBanner = true
+    
     @State private var isShowingReasonEditSheet = false
     @State private var isShowingTemplateEditSheet = false
     
@@ -118,17 +120,17 @@ private extension SettingView {
     
     private var generalSettingSection: some View {
         Section(header: Text("設定")) {
-            Picker("週の始まり", selection: $firstWeekday) {
-                Text("日曜日").tag(1)
-                Text("月曜日").tag(2)
-            }
-            
             Picker("外観モード", selection: $colorScheme) {
                 Text("端末の設定を使う").tag(0)
                 Text("ライトモード").tag(1)
                 Text("ダークモード").tag(2)
             }
             
+            Picker("週の始まり", selection: $firstWeekday) {
+                Text("日曜日").tag(1)
+                Text("月曜日").tag(2)
+            }
+                        
             Button {
                 isShowingReasonEditSheet = true
             } label: {
@@ -152,6 +154,8 @@ private extension SettingView {
                         .foregroundColor(.secondary)
                 }
             }
+            
+            Toggle("振り返り待ち通知バナーを表示", isOn: $showReflectionBanner)
         }
     }
     
