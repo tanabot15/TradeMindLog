@@ -44,7 +44,7 @@ struct SettingView: View {
                 appInfoSection
                 footerSection
             }
-            .navigationTitle("Setting")
+            .navigationTitle("設定")
             // sheet modifier
             .sheet(isPresented: $isShowingReasonEditSheet) {
                 ReasonEditSheetView(
@@ -119,7 +119,7 @@ private extension SettingView {
     }
     
     private var generalSettingSection: some View {
-        Section(header: Text("設定")) {
+        Section(header: Text("アプリ設定")) {
             Picker("外観モード", selection: $colorScheme) {
                 Text("端末の設定を使う").tag(0)
                 Text("ライトモード").tag(1)
@@ -203,7 +203,7 @@ private extension SettingView {
                 Text("Version")
                 Spacer()
                 // change when updating
-                Text("2.3")
+                Text("2.4")
                     .foregroundColor(.secondary)
             }
             

@@ -47,26 +47,124 @@ struct EvaluationView: View {
         }
     }
     
+    var bestMetric: ReasonEvaluationData? {
+        evaluationResults.first
+    }
+    
+    var worstMetric: ReasonEvaluationData? {
+        if evaluationResults.count > 1 {
+            return evaluationResults.last
+        }
+        return nil
+    }
+    
     var body: some View {
         NavigationStack {
-            VStack(spacing: 16) {
-                Picker("Situation", selection: $selectedSituation) {
-                    Text("購入").tag(Situation.buy)
-                    Text("売却").tag(Situation.sell)
-                }
-                .pickerStyle(.segmented)
-                .padding(.horizontal)
-                .padding(.top, 10)
-                
-                if evaluationResults.isEmpty {
-                    ContentUnavailableView(
-                        "データが不足しています",
-                        systemImage: "chart.bar.yaxis",
-                        description: Text("評価が登録されたトレード記録を視覚化します")
-                    )
-                } else {
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 12) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    Picker("Situation", selection: $selectedSituation) {
+                        Text("購入").tag(Situation.buy)
+                        Text("売却").tag(Situation.sell)
+                    }
+                    .pickerStyle(.segmented)
+                    .padding(.top, 10)
+                    
+                    if evaluationResults.isEmpty {
+                        ContentUnavailableView(
+                            "データが不足しています",
+                            systemImage: "chart.bar.yaxis",
+                            description: Text("評価が登録されたトレード記録を視覚化します")
+                        )
+                    } else {
+                        HStack(spacing: 12) {
+                            // best card
+                            if let best = bestMetric {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "checkmark.seal.fill")
+                                            .foregroundColor(.green)
+                                        Text("最優秀パターン")
+                                            .font(.caption)
+                                            .fontWeight(.bold)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    
+                                    Text(best.reasonName)
+                                        .font(.subheadline)
+                                        .fontWeight(.semibold)
+                                        .lineLimit(1)
+                                    
+                                    HStack(alignment: .firstTextBaseline, spacing: 2) {
+                                        Text(String(format: "%.1f", best.averageRating))
+                                            .font(.system(.title, design: .rounded))
+                                            .fontWeight(.bold)
+                                            .foregroundColor(.green)
+                                        Image(systemName: "star.fill")
+                                            .foregroundColor(.green)
+                                            .font(.caption)
+                                        Text("(\(best.count)件)")
+                                            .font(.caption2)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                                .padding()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Color.green.opacity(0.1))
+                                .cornerRadius(12)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.green.opacity(0.2), lineWidth: 1)
+                                )
+                            }
+                            
+                            // worst card
+                            if let worst = worstMetric {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "exclamationmark.triangle.fill")
+                                            .foregroundColor(.pink)
+                                        Text("要改善パターン")
+                                            .font(.caption)
+                                            .fontWeight(.bold)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    
+                                    Text(worst.reasonName)
+                                        .font(.subheadline)
+                                        .fontWeight(.semibold)
+                                        .lineLimit(1)
+                                    
+                                    HStack(alignment: .firstTextBaseline, spacing: 2) {
+                                        Text(String(format: "%.1f", worst.averageRating))
+                                            .font(.system(.title, design: .rounded))
+                                            .fontWeight(.bold)
+                                            .foregroundColor(.pink)
+                                        Image(systemName: "star.fill")
+                                            .foregroundColor(.pink)
+                                            .font(.caption)
+                                        Text("(\(worst.count)件)")
+                                            .font(.caption2)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                                .padding()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Color.pink.opacity(0.1))
+                                .cornerRadius(12)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.pink.opacity(0.2), lineWidth: 1)
+                                )
+                            }
+                        }
+                        
+                        // bar chart
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("理由別の平均スコア")
+                                .font(.caption)
+                                .fontWeight(.bold)
+                                .foregroundColor(.secondary)
+                            
                             Chart(evaluationResults) { data in
                                 BarMark(
                                     x: .value("評価", data.averageRating),
@@ -87,64 +185,65 @@ struct EvaluationView: View {
                                 AxisMarks(values: [0, 1, 2, 3, 4, 5])
                             }
                             .frame(height: CGFloat(evaluationResults.count * 45) + 30)
-                            .padding()
+                            .padding(.trailing, 30)
+                        }
+                        
+                        Divider()
+                        
+                        // detail list
+                        VStack(alignment: .leading,spacing: 12) {
+                            Text("傾向評価")
+                                .font(.headline)
+                                .padding(.top, 8)
                             
-                            Divider()
-                            
-                            VStack(alignment: .leading,spacing: 12) {
-                                Text("傾向評価")
-                                    .font(.headline)
-                                    .padding(.top, 8)
-                                
-                                ForEach(Array(evaluationResults.enumerated()), id: \.element.id) { index, data in
-                                    HStack {
-                                        Text("\(index + 1)")
-                                            .font(.caption)
-                                            .bold()
-                                            .foregroundStyle(.primary)
-                                            .frame(width: 20, height: 20)
-                                            .background(index == 0 ? Color.yellow : (index == 1 ? Color.gray : Color.secondary))
-                                            .clipShape(Circle())
-                                        
-                                        Text(data.reasonName)
-                                            .font(.subheadline)
-                                        
-                                        Spacer()
-                                        
-                                        VStack(alignment: .trailing, spacing: 2) {
-                                            HStack(spacing: 2) {
-                                                Text("平均")
-                                                Text(String(format: "%.1f", data.averageRating))
-                                                    .bold()
-                                                Image(systemName: "star.fill")
-                                                    .foregroundColor(.yellow)
-                                                    .font(.caption)
-                                            }
-                                            .font(.subheadline)
-                                            
-                                            Text("(\(data.count)件の評価")
-                                                .font(.caption2)
-                                                .foregroundColor(.secondary)
-                                        }
-                                    }
-                                    .padding(.horizontal)
-                                    .padding(.vertical, 4)
+                            ForEach(Array(evaluationResults.enumerated()), id: \.element.id) { index, data in
+                                HStack {
+                                    Text("\(index + 1)")
+                                        .font(.caption)
+                                        .bold()
+                                        .foregroundStyle(.primary)
+                                        .frame(width: 20, height: 20)
+                                        .background(index == 0 ? Color.yellow : (index == 1 ? Color.gray : Color.secondary))
+                                        .clipShape(Circle())
                                     
-                                    if index < evaluationResults.count - 1 {
-                                        Divider()
+                                    Text(data.reasonName)
+                                        .font(.subheadline)
+                                    
+                                    Spacer()
+                                    
+                                    VStack(alignment: .trailing, spacing: 2) {
+                                        HStack(spacing: 2) {
+                                            Text("平均")
+                                            Text(String(format: "%.1f", data.averageRating))
+                                                .bold()
+                                            Image(systemName: "star.fill")
+                                                .foregroundColor(.yellow)
+                                                .font(.caption)
+                                        }
+                                        .font(.subheadline)
+                                        
+                                        Text("(\(data.count)件)")
+                                            .font(.caption2)
+                                            .foregroundColor(.secondary)
                                     }
                                 }
+                                .padding(.horizontal)
+                                .padding(.vertical, 4)
+                                
+                                if index < evaluationResults.count - 1 {
+                                    Divider()
+                                }
                             }
-                            .padding(.horizontal)
-                            .padding(.bottom)
-                            .background(Color(.secondarySystemBackground))
-                            .cornerRadius(12)
                         }
-                        .padding()
+                        .padding(.horizontal)
+                        .padding(.bottom)
+                        .background(Color(.secondarySystemBackground))
+                        .cornerRadius(12)
                     }
                 }
+                .padding()
             }
-            .navigationTitle("Evaluation")
+            .navigationTitle("トレード評価")
         }
     }
     

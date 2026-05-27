@@ -13,27 +13,27 @@ struct ContentView: View {
         TabView {
             ListView()
                 .tabItem {
-                    Label("List", systemImage: "list.bullet")
+                    Label("レコード", systemImage: "list.bullet")
                 }
             
             CalendarView()
                 .tabItem {
-                    Label("Calendar", systemImage: "calendar")
+                    Label("カレンダー", systemImage: "calendar")
                 }
             
             AnalysisView()
                 .tabItem {
-                    Label("Analysis", systemImage: "chart.pie")
+                    Label("分析", systemImage: "chart.pie")
                 }
             
             EvaluationView()
                 .tabItem {
-                    Label("Evaluation", systemImage: "chart.bar.yaxis")
+                    Label("評価", systemImage: "chart.bar.yaxis")
                 }
             
             SettingView()
                 .tabItem {
-                    Label("Setting", systemImage: "gear")
+                    Label("設定", systemImage: "gear")
                 }
         }
     }

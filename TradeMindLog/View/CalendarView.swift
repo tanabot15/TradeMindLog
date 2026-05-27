@@ -54,18 +54,17 @@ struct CalendarView: View {
                 .listRowBackground(Color.clear)
                 
                 if filteredRecords.buy.isEmpty && filteredRecords.sell.isEmpty {
-                    Text("Recordがありません")
+                    Text("トレードレコードがありません")
                 } else {
                     // buy section
-                    recordSection(title: "購入Record", records: filteredRecords.buy, color: .blue)
+                    recordSection(title: "購入レコード", records: filteredRecords.buy, color: .blue)
                     // sell section
-                    recordSection(title: "売却Records", records: filteredRecords.sell, color: .red)
+                    recordSection(title: "売却レコード", records: filteredRecords.sell, color: .red)
                 }
             }
-            
             .scrollContentBackground(.hidden)
             .background(Color(.systemBackground))
-            .navigationTitle("Calendar")
+            .navigationTitle("カレンダー")
             .toolbar {
                 Button("Add Record", systemImage: "plus") {
                     createNewRecord()

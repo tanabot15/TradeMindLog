@@ -49,42 +49,36 @@ struct ListView: View {
     
     var body: some View {
         NavigationStack {
-            if currentSituationRecords.isEmpty {
-                VStack(spacing: 0) {
-                    pickerView
-                    emptyStateView(for: selectedSituation.rawValue)
-                }
-                .navigationTitle("Records")
-                .toolbar {
-                    Button("Add Record", systemImage: "plus") {
-                        createNewRecord()
+            VStack(spacing: 0) {
+                pickerView
+                
+                if currentSituationRecords.isEmpty {
+                    VStack(spacing: 0) {
+                        emptyStateView(for: selectedSituation.rawValue)
+                    }
+                } else {
+                    VStack(spacing: 0) {
+                        notificationBannerView
+                        recordListView(for: filteredRecords)
+                        
                     }
                 }
-                .sheet(item: $recordToCreate) { newRecord in
-                    AddRecordView(record: newRecord, isNew: true)
+            }
+            .scrollContentBackground(.hidden)
+            .background(Color(.systemBackground))
+            .navigationTitle("トレードレコード")
+            .searchable(text: $searchText, prompt: "銘柄名またはコードで検索")
+            .onChange(of: selectedSituation) { oldValue, newValue in
+                searchText = ""
+                showUnratedOnly = false
+            }
+            .toolbar {
+                Button("Add Record", systemImage: "plus") {
+                    createNewRecord()
                 }
-            } else {
-                VStack(spacing: 0) {
-                    notificationBannerView
-                    pickerView
-                    recordListView(for: filteredRecords)
-                        .scrollContentBackground(.hidden)
-                        .background(Color(.systemBackground))
-                        .navigationTitle("Records")
-                        .searchable(text: $searchText, prompt: "銘柄名またはコードで検索")
-                        .onChange(of: selectedSituation) { oldValue, newValue in
-                            searchText = ""
-                            showUnratedOnly = false
-                        }
-                        .toolbar {
-                            Button("Add Record", systemImage: "plus") {
-                                createNewRecord()
-                            }
-                        }
-                        .sheet(item: $recordToCreate) { newRecord in
-                            AddRecordView(record: newRecord, isNew: true)
-                        }
-                }
+            }
+            .sheet(item: $recordToCreate) { newRecord in
+                AddRecordView(record: newRecord, isNew: true)
             }
         }
     }
@@ -191,7 +185,7 @@ struct ListView: View {
                             
                             Spacer()
                             
-                            VStack(alignment: .trailing, spacing: 8) {
+                            VStack(alignment: .listRowSeparatorLeading, spacing: 8) {
                                 Text("理由：\(record.situation == .buy ? record.buyReason.localizedName(customNames: customBuyReasons) : record.sellReason.localizedName(customNames: customSellReasons))")
                                     .font(.headline)
                                 

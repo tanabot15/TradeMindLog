@@ -118,7 +118,7 @@ struct AnalysisView: View {
                     
                     if filteredRecords.isEmpty {
                         ContentUnavailableView(
-                            "表示できるRecordがありません",
+                            "表示できるレコードがありません",
                             systemImage: "chart.pie",
                             description: Text("\(selectedTimeFilter.rawValue)の\(selectedSituation.rawValue)取引が存在しません")
                         )
@@ -216,7 +216,7 @@ struct AnalysisView: View {
                     }
                 }
             }
-            .navigationTitle("Analysis")
+            .navigationTitle("トレード分析")
         }
     }
 }

@@ -165,7 +165,7 @@ struct AddRecordView: View {
                 }
                 
             }
-            .navigationTitle(isNew ? "Recordの追加" : "Recordの評価・編集")
+            .navigationTitle(isNew ? "レコードの追加" : "レコードの評価・編集")
             .onAppear {
                 let currentPrice = record.situation == .buy ? record.buyPrice : record.sellPrice
                 
