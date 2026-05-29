@@ -39,6 +39,14 @@ enum Situation: String, Codable, CaseIterable, Identifiable {
     var id: String { self.rawValue }
 }
 
+enum TimeFilter: String, CaseIterable, Identifiable {
+    case all = "全期間"
+    case thisYear = "今年"
+    case thisMonth = "今月"
+    
+    var id: String { self.rawValue }
+}
+
 @Model
 class Record {
     var id: UUID = UUID()

@@ -9,9 +9,15 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
+    @State private var sharedSituation: Situation = .buy
+    @State private var sharedTimeFilter: TimeFilter = .all
+    
     var body: some View {
         TabView {
-            ListView()
+            ListView(
+                selectedSituation: $sharedSituation,
+                selectedTimeFilter: $sharedTimeFilter
+            )
                 .tabItem {
                     Label("レコード", systemImage: "list.bullet")
                 }
@@ -21,12 +27,18 @@ struct ContentView: View {
                     Label("カレンダー", systemImage: "calendar")
                 }
             
-            AnalysisView()
+            AnalysisView(
+                selectedSituation: $sharedSituation,
+                selectedTimeFilter: $sharedTimeFilter
+            )
                 .tabItem {
                     Label("分析", systemImage: "chart.pie")
                 }
             
-            EvaluationView()
+            EvaluationView(
+                selectedSituation: $sharedSituation,
+                selectedTimeFilter: $sharedTimeFilter
+            )
                 .tabItem {
                     Label("評価", systemImage: "chart.bar.yaxis")
                 }

@@ -16,14 +16,32 @@ struct ListView: View {
     @AppStorage("customSellReasons") private var customSellReasons: [String] = []
     @AppStorage("showReflectionBanner") private var showReflectionBanner = true
     
-    @State private var selectedSituation: Situation = .buy
+    @Binding var selectedSituation: Situation
+    @Binding var selectedTimeFilter: TimeFilter
+    
     @State private var recordToCreate: Record?
     @State private var searchText = ""
-    
     @State private var showUnratedOnly = false
     
     var currentSituationRecords: [Record] {
-        records.filter { $0.situation == selectedSituation}
+        let situationRecords = records.filter { $0.situation == selectedSituation }
+        let now = Date()
+        let calendar = Calendar.current
+        
+        return situationRecords.filter { record in
+            guard let targetDate = (record.situation == .buy ? record.buyDate : record.sellDate) else {
+                return false
+            }
+            
+            switch selectedTimeFilter {
+            case .all:
+                return true
+            case .thisYear:
+                return calendar.isDate(targetDate, equalTo: now, toGranularity: .year)
+            case .thisMonth:
+                return calendar.isDate(targetDate, equalTo: now, toGranularity: .month)
+            }
+        }
     }
     
     var unratedCount: Int {
@@ -73,8 +91,26 @@ struct ListView: View {
                 showUnratedOnly = false
             }
             .toolbar {
-                Button("Add Record", systemImage: "plus") {
-                    createNewRecord()
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Picker("期間", selection: $selectedTimeFilter) {
+                            ForEach(TimeFilter.allCases) { filter in
+                                Text(filter.rawValue).tag(filter)
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "line.3.horizontal.decrease.circle")
+                            Text(selectedTimeFilter.rawValue)
+                                .font(.subheadline)
+                        }
+                    }
+                }
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Add Record", systemImage: "plus") {
+                        createNewRecord()
+                    }
                 }
             }
             .sheet(item: $recordToCreate) { newRecord in
@@ -247,7 +283,7 @@ struct ListView: View {
 }
 
 #Preview {
-    ListView()
+    ListView(selectedSituation: .constant(.buy), selectedTimeFilter: .constant(.all))
         .modelContainer(previewContainer)
 //        .preferredColorScheme(.dark)
 }

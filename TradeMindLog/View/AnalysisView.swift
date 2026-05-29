@@ -12,19 +12,11 @@ import Charts
 struct AnalysisView: View {
     @Query var records: [Record]
     
-    @State private var selectedSituation: Situation = .buy
-    @State private var selectedTimeFilter: TimeFilter = .all
+    @Binding var selectedSituation: Situation
+    @Binding var selectedTimeFilter: TimeFilter
     
     @AppStorage("customBuyReasons") private var customBuyReasons: [String] = []
     @AppStorage("customSellReasons") private var customSellReasons: [String] = []
-    
-    enum TimeFilter: String, CaseIterable, Identifiable {
-        case all = "全期間"
-        case thisYear = "今年"
-        case thisMonth = "今月"
-        
-        var id: String { self.rawValue }
-    }
     
     var filteredRecords: [Record] {
         let situationRecords = records.filter { $0.situation == selectedSituation }
@@ -94,29 +86,31 @@ struct AnalysisView: View {
     
     var body: some View {
         NavigationStack {            
-            ScrollView {
-                VStack(spacing: 12) {
-                    Picker("Situation", selection: $selectedSituation) {
-                        Text("購入").tag(Situation.buy)
-                        Text("売却").tag(Situation.sell)
-                    }
-                    .pickerStyle(.segmented)
-                    
-                    if currentStats.isEmpty {
-                        Spacer()
-                        ContentUnavailableView(
-                            "表示できるレコードがありません",
-                            systemImage: "chart.pie",
-                            description: Text("\(selectedTimeFilter.rawValue)の\(selectedSituation.rawValue)取引が存在しません")
-                        )
-                        Spacer()
-                    } else {
-                        VStack {
+            VStack(spacing: 12) {
+                Picker("Situation", selection: $selectedSituation) {
+                    Text("購入").tag(Situation.buy)
+                    Text("売却").tag(Situation.sell)
+                }
+                .pickerStyle(.segmented)
+                .padding()
+                
+                if currentStats.isEmpty {
+                    Spacer()
+                    ContentUnavailableView(
+                        "表示できるレコードがありません",
+                        systemImage: "chart.pie",
+                        description: Text("\(selectedTimeFilter.rawValue)の\(selectedSituation.rawValue)取引が存在しません")
+                    )
+                    Spacer()
+                } else {
+                    ScrollView {
+                        VStack(spacing: 20) {
                             Text("\(selectedSituation.rawValue)理由の比率")
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                                 .bold()
                                 .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal)
                             
                             ZStack {
                                 Chart(Array(currentStats.enumerated()), id: \.element.id) { index, stat in
@@ -157,49 +151,46 @@ struct AnalysisView: View {
                                         .bold()
                                 }
                             }
-                        }
-                        .padding(16)
-                        .background(Color(.secondarySystemBackground))
-                        .cornerRadius(16)
-                    
-                        VStack(alignment: .leading) {
-                            Text("売買理由の集計詳細")
-                                .font(.headline)
-                                .padding(.horizontal)
-                                .padding(.top, 10)
                             
-                            VStack(spacing: 0) {
-                                ForEach(Array(currentStats.enumerated()), id: \.element.id) { index,stat in
-                                    HStack(spacing: 12) {
-                                        Circle()
-                                            .fill(chartColors[index % chartColors.count])
-                                            .frame(width: 10, height: 10)
+                            VStack(alignment: .leading) {
+                                Text("売買理由の集計詳細")
+                                    .font(.headline)
+                                    .padding(.horizontal)
+                                    .padding(.top, 10)
+                                
+                                VStack(spacing: 0) {
+                                    ForEach(Array(currentStats.enumerated()), id: \.element.id) { index,stat in
+                                        HStack(spacing: 12) {
+                                            Circle()
+                                                .fill(chartColors[index % chartColors.count])
+                                                .frame(width: 10, height: 10)
+                                            
+                                            Text(stat.reason)
+                                                .font(.body)
+                                            
+                                            Spacer()
+                                            
+                                            Text("\(stat.count) 回")
+                                                .font(.body)
+                                                .bold()
+                                            
+                                            Text(String(format: "%.1f%%", stat.percentage))
+                                                .font(.subheadline)
+                                                .foregroundStyle(.secondary)
+                                                .frame(width: 60, alignment: .trailing)
+                                        }
+                                        .padding()
                                         
-                                        Text(stat.reason)
-                                            .font(.body)
-                                        
-                                        Spacer()
-                                        
-                                        Text("\(stat.count) 回")
-                                            .font(.body)
-                                            .bold()
-                                        
-                                        Text(String(format: "%.1f%%", stat.percentage))
-                                            .font(.subheadline)
-                                            .foregroundStyle(.secondary)
-                                            .frame(width: 60, alignment: .trailing)
-                                    }
-                                    .padding()
-                                    
-                                    if index < currentStats.count - 1 {
-                                        Divider()
+                                        if index < currentStats.count - 1 {
+                                            Divider()
+                                        }
                                     }
                                 }
+                                .padding(.horizontal)
                             }
                         }
                     }
                 }
-                .padding(.horizontal)
             }
             .navigationTitle("トレード分析")
             .toolbar {
@@ -224,7 +215,7 @@ struct AnalysisView: View {
 }
 
 #Preview {
-    AnalysisView()
+    AnalysisView(selectedSituation: .constant(.buy), selectedTimeFilter: .constant(.all))
         .modelContainer(previewContainer)
 //        .preferredColorScheme(.dark)
 }
