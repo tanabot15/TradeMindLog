@@ -24,10 +24,39 @@ struct EvaluationView: View {
     @AppStorage("customSellReasons") private var customSellReasons: [String] = []
     
     @State private var selectedSituation: Situation = .buy
+    @State private var selectedTimeFilter: TimeFilter = .all
+    
+    enum TimeFilter: String, CaseIterable, Identifiable {
+        case all = "全期間"
+        case thisYear = "今年"
+        case thisMonth = "今月"
+        
+        var id: String { self.rawValue }
+    }
+    
+    var filteredRecords: [Record] {
+        let situationRecords = records.filter { $0.situation == selectedSituation }
+        
+        let now = Date()
+        let calendar = Calendar.current
+        
+        return situationRecords.filter { record in
+            guard let targetDate = (record.situation == .buy ? record.buyDate : record.sellDate) else {
+                return false
+            }
+            
+            switch selectedTimeFilter {
+            case .all:
+                return true
+            case .thisYear:
+                return calendar.isDate(targetDate, equalTo: now, toGranularity: .year)
+            case .thisMonth:
+                return calendar.isDate(targetDate, equalTo: now, toGranularity: .month)
+            }
+        }
+    }
     
     var evaluationResults: [ReasonEvaluationData] {
-        let filteredRecords = records.filter { $0.situation == selectedSituation }
-        
         if selectedSituation == .buy {
             return BuyReason.allCases.map { reason in
                 let targetRecords = filteredRecords.filter { $0.buyReason == reason }
@@ -61,20 +90,21 @@ struct EvaluationView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 12) {
                     Picker("Situation", selection: $selectedSituation) {
                         Text("購入").tag(Situation.buy)
                         Text("売却").tag(Situation.sell)
                     }
                     .pickerStyle(.segmented)
-                    .padding(.top, 10)
                     
                     if evaluationResults.isEmpty {
+                        Spacer()
                         ContentUnavailableView(
                             "データが不足しています",
                             systemImage: "chart.bar.yaxis",
-                            description: Text("評価が登録されたトレード記録を視覚化します")
+                            description: Text(selectedTimeFilter == .all ? "評価が登録されたトレード履歴を視覚化します" : "選択された期間（\(selectedTimeFilter.rawValue)）に評価済みのトレード実績がありません")
                         )
+                        Spacer()
                     } else {
                         HStack(spacing: 12) {
                             // best card
@@ -161,9 +191,8 @@ struct EvaluationView: View {
                         // bar chart
                         VStack(alignment: .leading, spacing: 6) {
                             Text("理由別の平均スコア")
-                                .font(.caption)
+                                .font(.subheadline)
                                 .fontWeight(.bold)
-                                .foregroundColor(.secondary)
                             
                             Chart(evaluationResults) { data in
                                 BarMark(
@@ -187,14 +216,15 @@ struct EvaluationView: View {
                             .frame(height: CGFloat(evaluationResults.count * 45) + 30)
                             .padding(.trailing, 30)
                         }
-                        
-                        Divider()
+                        .padding()
+                        .background(Color(.secondarySystemBackground))
+                        .cornerRadius(12)
                         
                         // detail list
                         VStack(alignment: .leading,spacing: 12) {
                             Text("傾向評価")
-                                .font(.headline)
-                                .padding(.top, 8)
+                                .font(.subheadline)
+                                .fontWeight(.bold)
                             
                             ForEach(Array(evaluationResults.enumerated()), id: \.element.id) { index, data in
                                 HStack {
@@ -211,21 +241,18 @@ struct EvaluationView: View {
                                     
                                     Spacer()
                                     
-                                    VStack(alignment: .trailing, spacing: 2) {
-                                        HStack(spacing: 2) {
-                                            Text("平均")
-                                            Text(String(format: "%.1f", data.averageRating))
-                                                .bold()
-                                            Image(systemName: "star.fill")
-                                                .foregroundColor(.yellow)
-                                                .font(.caption)
-                                        }
-                                        .font(.subheadline)
-                                        
+                                    HStack(spacing: 2) {
+                                        Text("平均")
+                                        Text(String(format: "%.1f", data.averageRating))
+                                            .bold()
+                                        Image(systemName: "star.fill")
+                                            .foregroundColor(.yellow)
+                                            .font(.caption)
                                         Text("(\(data.count)件)")
                                             .font(.caption2)
                                             .foregroundColor(.secondary)
                                     }
+                                    .font(.subheadline)
                                 }
                                 .padding(.horizontal)
                                 .padding(.vertical, 4)
@@ -235,8 +262,7 @@ struct EvaluationView: View {
                                 }
                             }
                         }
-                        .padding(.horizontal)
-                        .padding(.bottom)
+                        .padding()
                         .background(Color(.secondarySystemBackground))
                         .cornerRadius(12)
                     }
@@ -244,6 +270,23 @@ struct EvaluationView: View {
                 .padding()
             }
             .navigationTitle("トレード評価")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Picker("期間", selection: $selectedTimeFilter) {
+                            ForEach(TimeFilter.allCases) { filter in
+                                Text(filter.rawValue).tag(filter)
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "line.3.horizontal.decrease.circle")
+                            Text(selectedTimeFilter.rawValue)
+                                .font(.subheadline)
+                        }
+                    }
+                }
+            }
         }
     }
     

@@ -48,50 +48,47 @@ struct AnalysisView: View {
         }
     }
     
-    struct ReasonStat: Identifiable {
+    struct Stat: Identifiable {
         let id = UUID()
         let reason: String
         let count: Int
         let percentage: Double
     }
     
-    var buyReasonStats: [ReasonStat] {
-        let groupedByReason = Dictionary(grouping: filteredRecords) { record in
-            record.buyReason.localizedName(customNames: customBuyReasons)
-        }
-        let total = Double(filteredRecords.count)
-        return groupedByReason.map { key, value in
-            ReasonStat(
-                reason: key,
-                count: value.count,
-                percentage: total > 0 ? (Double(value.count) / total) * 100 : 0
-            )
-        }.sorted { $0.count > $1.count }
-    }
-    
-    var sellReasonStats: [ReasonStat] {
-        let groupedByReason = Dictionary(grouping: filteredRecords) { record in
-            record.sellReason.localizedName(customNames: customSellReasons)
-        }
-        let total = Double(filteredRecords.count)
-        return groupedByReason.map { key, value in
-            ReasonStat(
-                reason: key,
-                count: value.count,
-                percentage: total > 0 ? (Double(value.count) / total) * 100 : 0
-            )
-        }.sorted { $0.count > $1.count}
-    }
-    
-    var currentStats: [ReasonStat] {
-        if selectedSituation == Situation.buy {
-            return buyReasonStats
+    var currentStats: [Stat] {
+        let totalCount = filteredRecords.count
+        guard totalCount > 0 else { return [] }
+        
+        if selectedSituation == .buy {
+            var counts: [BuyReason: Int] = [:]
+            for r in filteredRecords {
+                counts[r.buyReason, default: 0] += 1
+            }
+            return BuyReason.allCases.map { reason in
+                let count = counts[reason, default: 0]
+                let pct = (Double(count) / Double(totalCount)) * 100.0
+                let name = reason.localizedName(customNames: customBuyReasons)
+                return Stat(reason: name, count: count, percentage: pct)
+            }
+            .filter { $0.count > 0 }
+            .sorted { $0.count > $1.count }
         } else {
-            return sellReasonStats
+            var counts: [SellReason: Int] = [:]
+            for r in filteredRecords {
+                counts[r.sellReason, default: 0] += 1
+            }
+            return SellReason.allCases.map { reason in
+                let count = counts[reason, default: 0]
+                let pct = (Double(count) / Double(totalCount)) * 100.0
+                let name = reason.localizedName(customNames: customSellReasons)
+                return Stat(reason: name, count: count, percentage: pct)
+            }
+            .filter { $0.count > 0 }
+            .sorted { $0.count > $1.count }
         }
     }
     
-    let chartColors: [Color] = [
+    private let chartColors: [Color] = [
         .teal, .orange, .green, .cyan, .yellow, .indigo, .mint
     ]
     
@@ -104,25 +101,15 @@ struct AnalysisView: View {
                         Text("売却").tag(Situation.sell)
                     }
                     .pickerStyle(.segmented)
-                    .padding(.horizontal)
-                    .padding(.top, 10)
                     
-                    Picker("Time Filter", selection: $selectedTimeFilter) {
-                        ForEach(TimeFilter.allCases) { filter in
-                            Text(filter.rawValue).tag(filter)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .padding(.horizontal)
-                    .padding(.vertical, 10)
-                    
-                    if filteredRecords.isEmpty {
+                    if currentStats.isEmpty {
+                        Spacer()
                         ContentUnavailableView(
                             "表示できるレコードがありません",
                             systemImage: "chart.pie",
                             description: Text("\(selectedTimeFilter.rawValue)の\(selectedSituation.rawValue)取引が存在しません")
                         )
-                        .padding(.top, 60)
+                        Spacer()
                     } else {
                         VStack {
                             Text("\(selectedSituation.rawValue)理由の比率")
@@ -132,14 +119,14 @@ struct AnalysisView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             
                             ZStack {
-                                Chart(selectedSituation == Situation.buy ? buyReasonStats : sellReasonStats) { stat in
+                                Chart(Array(currentStats.enumerated()), id: \.element.id) { index, stat in
                                     SectorMark (
                                         angle: .value("count", stat.count),
                                         innerRadius: .ratio(0.5),
                                         angularInset: 1
                                     )
+                                    .foregroundStyle(chartColors[index % chartColors.count])
                                     .cornerRadius(6)
-                                    .foregroundStyle(by: .value("理由", stat.reason))
                                     .annotation(position: .overlay) {
                                         if stat.percentage > 10 {
                                             VStack {
@@ -152,8 +139,9 @@ struct AnalysisView: View {
                                         }
                                     }
                                 }
+                                
                                 .chartForegroundStyleScale(
-                                    domain: (selectedSituation == Situation.buy ? buyReasonStats : sellReasonStats).map { $0.reason },
+                                    domain: (currentStats).map { $0.reason },
                                     range: chartColors
                                 )
                                 .chartLegend(.hidden)
@@ -173,7 +161,6 @@ struct AnalysisView: View {
                         .padding(16)
                         .background(Color(.secondarySystemBackground))
                         .cornerRadius(16)
-                        .padding(.horizontal, 16)
                     
                         VStack(alignment: .leading) {
                             Text("売買理由の集計詳細")
@@ -182,8 +169,6 @@ struct AnalysisView: View {
                                 .padding(.top, 10)
                             
                             VStack(spacing: 0) {
-                                let currentStats = selectedSituation == Situation.buy ? buyReasonStats : sellReasonStats
-                                
                                 ForEach(Array(currentStats.enumerated()), id: \.element.id) { index,stat in
                                     HStack(spacing: 12) {
                                         Circle()
@@ -211,12 +196,29 @@ struct AnalysisView: View {
                                     }
                                 }
                             }
-                            .padding(.horizontal)
+                        }
+                    }
+                }
+                .padding(.horizontal)
+            }
+            .navigationTitle("トレード分析")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Picker("期間", selection: $selectedTimeFilter) {
+                            ForEach(TimeFilter.allCases) { filter in
+                                Text(filter.rawValue).tag(filter)
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "line.3.horizontal.decrease.circle")
+                            Text(selectedTimeFilter.rawValue)
+                                .font(.subheadline)
                         }
                     }
                 }
             }
-            .navigationTitle("トレード分析")
         }
     }
 }
