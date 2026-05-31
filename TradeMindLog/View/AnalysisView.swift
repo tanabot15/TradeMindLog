@@ -18,6 +18,10 @@ struct AnalysisView: View {
     @AppStorage("customBuyReasons") private var customBuyReasons: [String] = []
     @AppStorage("customSellReasons") private var customSellReasons: [String] = []
     
+    private var isCompletelyEmptyForSituation: Bool {
+            !records.contains { $0.situation == selectedSituation }
+        }
+    
     var filteredRecords: [Record] {
         let situationRecords = records.filter { $0.situation == selectedSituation }
         
@@ -94,13 +98,13 @@ struct AnalysisView: View {
                 .pickerStyle(.segmented)
                 .padding()
                 
-                if currentStats.isEmpty {
+                if isCompletelyEmptyForSituation {
                     Spacer()
-                    ContentUnavailableView(
-                        "表示できるレコードがありません",
-                        systemImage: "chart.pie",
-                        description: Text("\(selectedTimeFilter.rawValue)の\(selectedSituation.rawValue)取引が存在しません")
-                    )
+                    EmptyStateView(type: .completelyEmpty, situation: selectedSituation)
+                    Spacer()
+                } else if currentStats.isEmpty {
+                    Spacer()
+                    EmptyStateView(type: .filterEmpty(timeFilterText: selectedTimeFilter.rawValue), situation: selectedSituation)
                     Spacer()
                 } else {
                     ScrollView {

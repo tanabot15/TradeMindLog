@@ -23,6 +23,10 @@ struct ListView: View {
     @State private var searchText = ""
     @State private var showUnratedOnly = false
     
+    private var isCompletelyEmptyForSituation: Bool {
+        !records.contains { $0.situation == selectedSituation }
+    }
+    
     var currentSituationRecords: [Record] {
         let situationRecords = records.filter { $0.situation == selectedSituation }
         let now = Date()
@@ -70,16 +74,19 @@ struct ListView: View {
             VStack(spacing: 0) {
                 pickerView
                 
-                if currentSituationRecords.isEmpty {
-                    VStack(spacing: 0) {
-                        emptyStateView(for: selectedSituation.rawValue)
+                if isCompletelyEmptyForSituation {
+                    Spacer()
+                    EmptyStateView(type: .completelyEmpty, situation: selectedSituation) {
+                        createNewRecord()
                     }
+                    Spacer()
+                } else if currentSituationRecords.isEmpty {
+                    Spacer()
+                    EmptyStateView(type: .filterEmpty(timeFilterText: selectedTimeFilter.rawValue), situation: selectedSituation)
+                    Spacer()
                 } else {
-                    VStack(spacing: 0) {
-                        notificationBannerView
-                        recordListView(for: filteredRecords)
-                        
-                    }
+                    notificationBannerView
+                    recordListView(for: filteredRecords)
                 }
             }
             .scrollContentBackground(.hidden)
@@ -158,32 +165,6 @@ struct ListView: View {
         }
         .pickerStyle(.segmented)
         .padding()
-    }
-    
-    @ViewBuilder
-    private func emptyStateView(for situation: String) -> some View {
-        ContentUnavailableView {
-            Label(
-                "最初の\(situation)取引を記録しましょう",
-                systemImage: situation == "購入" ? "tray.and.arrow.down" : "tray.and.arrow.up"
-            )
-        } description: {
-            Text("投資した銘柄の情報を入力して、あなたのトレードの記録を始めましょう")
-        } actions: {
-            Button(action: {
-                createNewRecord()
-            }) {
-                HStack {
-                    Image(systemName: "plus.circle.fill")
-                    Text("\(situation)の記録を追加")
-                }
-                .bold()
-                .font(.headline)
-                .padding()
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(situation == "購入" ? .blue.opacity(0.8) : .red.opacity(0.8))
-        }
     }
     
     @ViewBuilder

@@ -26,6 +26,10 @@ struct EvaluationView: View {
     @Binding var selectedSituation: Situation
     @Binding var selectedTimeFilter: TimeFilter
     
+    private var isCompletelyEmptyForSituation: Bool {
+        !records.contains { $0.situation == selectedSituation }
+    }
+    
     var filteredRecords: [Record] {
         let situationRecords = records.filter { $0.situation == selectedSituation }
         
@@ -89,13 +93,13 @@ struct EvaluationView: View {
                 .pickerStyle(.segmented)
                 .padding()
                 
-                if evaluationResults.isEmpty {
+                if isCompletelyEmptyForSituation {
                     Spacer()
-                    ContentUnavailableView(
-                        "データが不足しています",
-                        systemImage: "chart.bar.yaxis",
-                        description: Text(selectedTimeFilter == .all ? "評価が登録されたトレード履歴を視覚化します" : "選択された期間（\(selectedTimeFilter.rawValue)）に評価済みのトレード実績がありません")
-                    )
+                    EmptyStateView(type: .completelyEmpty, situation: selectedSituation)
+                    Spacer()
+                } else if evaluationResults.isEmpty {
+                    Spacer()
+                    EmptyStateView(type: .filterEmpty(timeFilterText: selectedTimeFilter.rawValue), situation: selectedSituation)
                     Spacer()
                 } else {
                     ScrollView {
@@ -210,9 +214,10 @@ struct EvaluationView: View {
                                 .frame(height: CGFloat(evaluationResults.count * 45) + 30)
                                 .padding(.trailing, 30)
                             }
-                            
-                            Divider()
-                            
+                            .padding()
+                            .background(Color(.secondarySystemBackground))
+                            .cornerRadius(12)
+                                                        
                             // detail list
                             VStack(alignment: .leading,spacing: 12) {
                                 Text("傾向評価")
