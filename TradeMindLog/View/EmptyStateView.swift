@@ -28,20 +28,6 @@ struct EmptyStateView: View {
                 )
             } description: {
                 Text("投資した銘柄の情報を入力して、あなたのトレードの記録を始めましょう")
-            } actions: {
-                if let onAddAction = onAddAction {
-                    Button(action: onAddAction) {
-                        HStack {
-                            Image(systemName: "plus.circle.fill")
-                            Text("\(situation.rawValue)の記録を追加")
-                        }
-                        .bold()
-                        .font(.headline)
-                        .padding()
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(situation == .buy ? .blue.opacity(0.8) : .red.opacity(0.8))
-                }
             }
             
         case .filterEmpty(let timeFilterText):

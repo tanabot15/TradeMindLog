@@ -96,7 +96,8 @@ struct AnalysisView: View {
                     Text("売却").tag(Situation.sell)
                 }
                 .pickerStyle(.segmented)
-                .padding()
+                .padding(.horizontal)
+                .padding(.vertical, 4)
                 
                 if isCompletelyEmptyForSituation {
                     Spacer()
@@ -109,52 +110,57 @@ struct AnalysisView: View {
                 } else {
                     ScrollView {
                         VStack(spacing: 20) {
-                            Text("\(selectedSituation.rawValue)理由の比率")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                                .bold()
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.horizontal)
-                            
-                            ZStack {
-                                Chart(Array(currentStats.enumerated()), id: \.element.id) { index, stat in
-                                    SectorMark (
-                                        angle: .value("count", stat.count),
-                                        innerRadius: .ratio(0.5),
-                                        angularInset: 1
-                                    )
-                                    .foregroundStyle(chartColors[index % chartColors.count])
-                                    .cornerRadius(6)
-                                    .annotation(position: .overlay) {
-                                        if stat.percentage > 10 {
-                                            VStack {
-                                                Text("\(stat.reason)")
-                                                Text(String(format: "%.0f%%", stat.percentage))
+                            VStack {
+                                Text("\(selectedSituation.rawValue)理由の比率")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                                    .bold()
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding()
+                                
+                                ZStack {
+                                    Chart(Array(currentStats.enumerated()), id: \.element.id) { index, stat in
+                                        SectorMark (
+                                            angle: .value("count", stat.count),
+                                            innerRadius: .ratio(0.5),
+                                            angularInset: 1
+                                        )
+                                        .foregroundStyle(chartColors[index % chartColors.count])
+                                        .cornerRadius(6)
+                                        .annotation(position: .overlay) {
+                                            if stat.percentage > 10 {
+                                                VStack {
+                                                    Text("\(stat.reason)")
+                                                    Text(String(format: "%.0f%%", stat.percentage))
+                                                }
+                                                .font(.caption2)
+                                                .bold()
+                                                .foregroundStyle(.white)
                                             }
-                                            .font(.caption2)
-                                            .bold()
-                                            .foregroundStyle(.white)
                                         }
                                     }
-                                }
-                                
-                                .chartForegroundStyleScale(
-                                    domain: (currentStats).map { $0.reason },
-                                    range: chartColors
-                                )
-                                .chartLegend(.hidden)
-                                .frame(height: 280)
-                                
-                                VStack(spacing: 2) {
-                                    Text("TOTAL")
-                                        .font(.caption2)
-                                        .bold()
-                                        .foregroundStyle(.secondary)
-                                    Text("\(filteredRecords.count)")
-                                        .font(.system(.title, design: .rounded))
-                                        .bold()
+                                    .padding(.bottom)
+                                    
+                                    .chartForegroundStyleScale(
+                                        domain: (currentStats).map { $0.reason },
+                                        range: chartColors
+                                    )
+                                    .chartLegend(.hidden)
+                                    .frame(height: 280)
+                                    
+                                    VStack(spacing: 2) {
+                                        Text("TOTAL")
+                                            .font(.caption2)
+                                            .bold()
+                                            .foregroundStyle(.secondary)
+                                        Text("\(filteredRecords.count)")
+                                            .font(.system(.title, design: .rounded))
+                                            .bold()
+                                    }
                                 }
                             }
+                            .background(Color(.secondarySystemBackground))
+                            .cornerRadius(12)
                             
                             VStack(alignment: .leading) {
                                 Text("売買理由の集計詳細")
@@ -190,9 +196,11 @@ struct AnalysisView: View {
                                         }
                                     }
                                 }
-                                .padding(.horizontal)
                             }
+                            .background(Color(.secondarySystemBackground))
+                            .cornerRadius(12)
                         }
+                        .padding()
                     }
                 }
             }

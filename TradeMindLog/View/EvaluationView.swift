@@ -91,7 +91,8 @@ struct EvaluationView: View {
                     Text("売却").tag(Situation.sell)
                 }
                 .pickerStyle(.segmented)
-                .padding()
+                .padding(.horizontal)
+                .padding(.vertical, 4)
                 
                 if isCompletelyEmptyForSituation {
                     Spacer()

@@ -10,6 +10,8 @@ import SwiftData
 
 struct CalendarView: View {
     @Environment(\.modelContext) var modelContext
+    @Environment(\.dismiss) var dismiss
+    
     @Query(sort: \Record.sellDate, order: .reverse) private var records: [Record]
     
     @AppStorage("firstWeekday") private var firstWeekday = 1
@@ -66,8 +68,18 @@ struct CalendarView: View {
             .background(Color(.systemBackground))
             .navigationTitle("カレンダー")
             .toolbar {
-                Button("Add Record", systemImage: "plus") {
-                    createNewRecord()
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "chevron.down")
+                    }
+                }
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Add Record", systemImage: "plus") {
+                        createNewRecord()
+                    }
                 }
             }
             .sheet(item: $recordToCreate) { newRecord in
@@ -256,5 +268,5 @@ struct CalendarView: View {
 #Preview {
     CalendarView()
         .modelContainer(previewContainer)
-        .preferredColorScheme(.dark)
+//        .preferredColorScheme(.dark)
 }

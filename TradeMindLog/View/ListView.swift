@@ -22,6 +22,7 @@ struct ListView: View {
     @State private var recordToCreate: Record?
     @State private var searchText = ""
     @State private var showUnratedOnly = false
+    @State private var isShowingCalendar = false
     
     private var isCompletelyEmptyForSituation: Bool {
         !records.contains { $0.situation == selectedSituation }
@@ -75,19 +76,27 @@ struct ListView: View {
                 pickerView
                 
                 if isCompletelyEmptyForSituation {
-                    Spacer()
-                    EmptyStateView(type: .completelyEmpty, situation: selectedSituation) {
-                        createNewRecord()
+                    VStack {
+                        Spacer()
+                        EmptyStateView(type: .completelyEmpty, situation: selectedSituation) {
+                            createNewRecord()
+                        }
+                        Spacer()
                     }
-                    Spacer()
                 } else if currentSituationRecords.isEmpty {
-                    Spacer()
-                    EmptyStateView(type: .filterEmpty(timeFilterText: selectedTimeFilter.rawValue), situation: selectedSituation)
-                    Spacer()
+                    VStack {
+                        Spacer()
+                        EmptyStateView(type: .filterEmpty(timeFilterText: selectedTimeFilter.rawValue), situation: selectedSituation)
+                        Spacer()
+                    }
                 } else {
-                    notificationBannerView
-                    recordListView(for: filteredRecords)
+                    VStack(spacing: 0) {
+                        notificationBannerView
+                        recordListView(for: filteredRecords)
+                    }
                 }
+                
+                bottomAddRecordButton
             }
             .scrollContentBackground(.hidden)
             .background(Color(.systemBackground))
@@ -98,6 +107,14 @@ struct ListView: View {
                 showUnratedOnly = false
             }
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        isShowingCalendar = true
+                    } label: {
+                        Image(systemName: "calendar")
+                    }
+                }
+                
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         Picker("期間", selection: $selectedTimeFilter) {
@@ -113,15 +130,14 @@ struct ListView: View {
                         }
                     }
                 }
-                
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Add Record", systemImage: "plus") {
-                        createNewRecord()
-                    }
-                }
             }
             .sheet(item: $recordToCreate) { newRecord in
                 AddRecordView(record: newRecord, isNew: true)
+            }
+            .sheet(isPresented: $isShowingCalendar) {
+                CalendarView()
+                    .presentationDetents([.large, .medium])
+                    .presentationDragIndicator(.visible)
             }
         }
     }
@@ -154,6 +170,7 @@ struct ListView: View {
                 .background(showUnratedOnly ? Color.orange.opacity(0.2) : Color(.secondarySystemBackground))
                 .cornerRadius(8)
                 .padding(.horizontal)
+                .padding(.vertical, 4)
             }
         }
     }
@@ -164,7 +181,8 @@ struct ListView: View {
             Text("売却").tag(Situation.sell)
         }
         .pickerStyle(.segmented)
-        .padding()
+        .padding(.horizontal)
+        .padding(.vertical, 4)
     }
     
     @ViewBuilder
@@ -232,6 +250,37 @@ struct ListView: View {
                 }
             }
         }
+    }
+    
+    // bottomAddRecordButton
+    private var bottomAddRecordButton: some View {
+        Button {
+            createNewRecord()
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: "plus.circle.fill")
+                    .font(.title3)
+                Text("新規\(selectedSituation.rawValue)レコードを追加")
+                    .font(.subheadline)
+                    .bold()
+            }
+            .foregroundColor(.white)
+            .padding(.vertical, 14)
+            .padding(.horizontal, 12)
+            .background(
+                Capsule()
+                    .fill(
+                        LinearGradient(
+                            colors: selectedSituation == .buy ? [.blue, Color.blue.opacity(0.8)] : [.red, Color.red.opacity(0.8)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+            )
+            .shadow(color: (selectedSituation == .buy ? Color.blue : Color.red).opacity(0.25), radius: 3, x: 0, y: 2)
+        }
+        .padding(.vertical, 12)
+        .background(Color(.systemBackground))
     }
     
     func deleteRecords(at offsets: IndexSet, from filteredList: [Record]) {

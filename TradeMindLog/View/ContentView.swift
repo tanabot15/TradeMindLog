@@ -29,11 +29,6 @@ struct ContentView: View {
             }
             .badge(totalUnratedCount > 0 ? totalUnratedCount : 0)
             
-            CalendarView()
-                .tabItem {
-                    Label("カレンダー", systemImage: "calendar")
-                }
-            
             AnalysisView(
                 selectedSituation: $sharedSituation,
                 selectedTimeFilter: $sharedTimeFilter
