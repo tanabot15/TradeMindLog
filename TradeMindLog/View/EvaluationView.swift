@@ -37,9 +37,7 @@ struct EvaluationView: View {
         let calendar = Calendar.current
         
         return situationRecords.filter { record in
-            guard let targetDate = (record.situation == .buy ? record.buyDate : record.sellDate) else {
-                return false
-            }
+            let targetDate = (record.situation == .buy ? record.buyDate : record.sellDate) ?? now
             
             switch selectedTimeFilter {
             case .all:
@@ -73,12 +71,13 @@ struct EvaluationView: View {
     }
     
     var bestMetric: ReasonEvaluationData? {
-        evaluationResults.first
+        evaluationResults.first { $0.averageRating > 0 }
     }
     
     var worstMetric: ReasonEvaluationData? {
-        if evaluationResults.count > 1 {
-            return evaluationResults.last
+        let ratedResults = evaluationResults.filter { $0.averageRating > 0 }
+        if ratedResults.count > 1 {
+            return ratedResults.last
         }
         return nil
     }
@@ -86,14 +85,6 @@ struct EvaluationView: View {
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 12) {
-                Picker("Situation", selection: $selectedSituation) {
-                    Text("購入").tag(Situation.buy)
-                    Text("売却").tag(Situation.sell)
-                }
-                .pickerStyle(.segmented)
-                .padding(.horizontal)
-                .padding(.vertical, 4)
-                
                 if isCompletelyEmptyForSituation {
                     Spacer()
                     EmptyStateView(type: .completelyEmpty, situation: selectedSituation)
@@ -198,7 +189,7 @@ struct EvaluationView: View {
                                         x: .value("評価", data.averageRating),
                                         y: .value("理由", data.reasonName)
                                     )
-                                    .foregroundStyle(selectedSituation == .buy ? Color.blue.gradient : Color.red.gradient)
+                                    .foregroundStyle(selectedSituation == .buy ? Color.blue.gradient : Color.orange.gradient)
                                     .cornerRadius(4)
                                     .annotation(position: .trailing, alignment: .leading) {
                                         Text(String(format: "%.1f★", data.averageRating))
@@ -271,6 +262,15 @@ struct EvaluationView: View {
             }
             .navigationTitle("トレード評価")
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Picker("Situation", selection: $selectedSituation) {
+                        Text("購入").tag(Situation.buy)
+                        Text("売却").tag(Situation.sell)
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(width: 140)
+                }
+                
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         Picker("期間", selection: $selectedTimeFilter) {
@@ -291,17 +291,22 @@ struct EvaluationView: View {
     }
     
     private func calculateAverage(records: [Record], name: String) -> ReasonEvaluationData {
-        let validRecords = records.filter { $0.rating > 0 }
-        let count = validRecords.count
+        let totalCount = records.count
         
-        if count == 0 {
+        if totalCount == 0 {
             return ReasonEvaluationData(reasonName: name, averageRating: 0.0, count: 0)
         }
         
-        let totalRating = validRecords.reduce(0) { $0 + $1.rating }
-        let average = Double(totalRating) / Double(count)
+        let ratedRecords = records.filter { $0.rating > 0 }
         
-        return ReasonEvaluationData(reasonName: name, averageRating: average, count: count)
+        if ratedRecords.isEmpty {
+            return ReasonEvaluationData(reasonName: name, averageRating: 0.0, count: totalCount)
+        }
+        
+        let totalRating = ratedRecords.reduce(0) { $0 + $1.rating }
+        let average = Double(totalRating) / Double(ratedRecords.count)
+        
+        return ReasonEvaluationData(reasonName: name, averageRating: average, count: totalCount)
     }
 }
 

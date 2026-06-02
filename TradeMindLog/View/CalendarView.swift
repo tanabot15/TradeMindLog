@@ -218,7 +218,7 @@ struct CalendarView: View {
                 } else if hasBuyRecord {
                     return .default(color: .systemBlue, size: .medium)
                 } else if hasSellRecord {
-                    return .default(color: .systemRed, size: .medium)
+                    return .default(color: .systemOrange, size: .medium)
                 }
                 
                 return nil

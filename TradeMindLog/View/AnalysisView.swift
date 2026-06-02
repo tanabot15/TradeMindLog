@@ -29,9 +29,7 @@ struct AnalysisView: View {
         let calendar = Calendar.current
         
         return situationRecords.filter { record in
-            guard let targetDate = (record.situation == .buy ? record.buyDate : record.sellDate) else {
-                return false
-            }
+            let targetDate = (record.situation == .buy ? record.buyDate : record.sellDate) ?? now
             
             switch selectedTimeFilter {
             case .all:
@@ -91,14 +89,6 @@ struct AnalysisView: View {
     var body: some View {
         NavigationStack {            
             VStack(spacing: 12) {
-                Picker("Situation", selection: $selectedSituation) {
-                    Text("購入").tag(Situation.buy)
-                    Text("売却").tag(Situation.sell)
-                }
-                .pickerStyle(.segmented)
-                .padding(.horizontal)
-                .padding(.vertical, 4)
-                
                 if isCompletelyEmptyForSituation {
                     Spacer()
                     EmptyStateView(type: .completelyEmpty, situation: selectedSituation)
@@ -206,6 +196,15 @@ struct AnalysisView: View {
             }
             .navigationTitle("トレード分析")
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Picker("Situation", selection: $selectedSituation) {
+                        Text("購入").tag(Situation.buy)
+                        Text("売却").tag(Situation.sell)
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(width: 140)
+                }
+                
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         Picker("期間", selection: $selectedTimeFilter) {

@@ -34,9 +34,7 @@ struct ListView: View {
         let calendar = Calendar.current
         
         return situationRecords.filter { record in
-            guard let targetDate = (record.situation == .buy ? record.buyDate : record.sellDate) else {
-                return false
-            }
+            let targetDate = (record.situation == .buy ? record.buyDate : record.sellDate) ?? now
             
             switch selectedTimeFilter {
             case .all:
@@ -73,8 +71,6 @@ struct ListView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                pickerView
-                
                 if isCompletelyEmptyForSituation {
                     VStack {
                         Spacer()
@@ -101,7 +97,7 @@ struct ListView: View {
             .scrollContentBackground(.hidden)
             .background(Color(.systemBackground))
             .navigationTitle("トレードレコード")
-            .searchable(text: $searchText, prompt: "銘柄名またはコードで検索")
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic), prompt: "銘柄名またはコードで検索")
             .onChange(of: selectedSituation) { oldValue, newValue in
                 searchText = ""
                 showUnratedOnly = false
@@ -113,6 +109,15 @@ struct ListView: View {
                     } label: {
                         Image(systemName: "calendar")
                     }
+                }
+                
+                ToolbarItem(placement: .principal) {
+                    Picker("Situation", selection: $selectedSituation) {
+                        Text("購入").tag(Situation.buy)
+                        Text("売却").tag(Situation.sell)
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(width: 140)
                 }
                 
                 ToolbarItem(placement: .topBarTrailing) {
@@ -153,7 +158,7 @@ struct ListView: View {
             }) {
                 HStack {
                     Image(systemName: showUnratedOnly ? "exclamationmark.triangle.fill" : "exclamationmark.triangle")
-                        .foregroundColor(.orange)
+                        .foregroundColor(.pink)
                     
                     Text(showUnratedOnly ? "振り返り待ちの \(unratedCount) 件を表示中（タップで解除）" : "振り返り待ちのレコードが \(unratedCount) 件あります")
                         .font(.subheadline)
@@ -167,24 +172,15 @@ struct ListView: View {
                         .font(.footnote)
                 }
                 .padding()
-                .background(showUnratedOnly ? Color.orange.opacity(0.2) : Color(.secondarySystemBackground))
+                .background(showUnratedOnly ? Color.pink.opacity(0.2) : Color(.secondarySystemBackground))
                 .cornerRadius(8)
                 .padding(.horizontal)
-                .padding(.vertical, 4)
+                .padding(.bottom, 8)
             }
         }
     }
     
-    private var pickerView: some View {
-        Picker("Situation", selection: $selectedSituation) {
-            Text("購入").tag(Situation.buy)
-            Text("売却").tag(Situation.sell)
-        }
-        .pickerStyle(.segmented)
-        .padding(.horizontal)
-        .padding(.vertical, 4)
-    }
-    
+    // List View
     @ViewBuilder
     private func recordListView(for filterRecords: [Record]) -> some View {
         List {
@@ -243,7 +239,7 @@ struct ListView: View {
                             }
                         }
                     }
-                    .listRowBackground(selectedSituation == Situation.buy ? Color.blue.opacity(0.40) : Color.red.opacity(0.40))
+                    .listRowBackground(selectedSituation == Situation.buy ? Color.blue.opacity(0.40) : Color.orange.opacity(0.40))
                 }
                 .onDelete { offsets in
                     deleteRecords(at: offsets, from: filterRecords)
@@ -253,6 +249,7 @@ struct ListView: View {
     }
     
     // bottomAddRecordButton
+    @ViewBuilder
     private var bottomAddRecordButton: some View {
         Button {
             createNewRecord()
@@ -271,13 +268,13 @@ struct ListView: View {
                 Capsule()
                     .fill(
                         LinearGradient(
-                            colors: selectedSituation == .buy ? [.blue, Color.blue.opacity(0.8)] : [.red, Color.red.opacity(0.8)],
+                            colors: selectedSituation == .buy ? [.blue, Color.blue.opacity(0.8)] : [.orange, Color.orange.opacity(0.8)],
                             startPoint: .top,
                             endPoint: .bottom
                         )
                     )
             )
-            .shadow(color: (selectedSituation == .buy ? Color.blue : Color.red).opacity(0.25), radius: 3, x: 0, y: 2)
+            .shadow(color: (selectedSituation == .buy ? Color.blue : Color.orange).opacity(0.25), radius: 3, x: 0, y: 2)
         }
         .padding(.vertical, 12)
         .background(Color(.systemBackground))
@@ -291,16 +288,18 @@ struct ListView: View {
     }
     
     private func createNewRecord() {
+        let isBuy = selectedSituation == .buy
+        
         let newRecord = Record(
             id: UUID(),
             stockName: "",
             tickerCode: "",
-            buyDate: .now,
-            sellDate: nil,
+            buyDate: isBuy ? .now : nil,
+            sellDate: isBuy ? nil : .now,
             buyPrice: 0.0,
             sellPrice: 0.0,
             quantity: 100,
-            situation: selectedSituation == Situation.buy ? .buy : .sell,
+            situation: isBuy ? .buy : .sell,
             buyReason: .others,
             sellReason: .others,
             note: "",
