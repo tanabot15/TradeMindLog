@@ -158,7 +158,7 @@ struct AddRecordView: View {
                                     Spacer()
                                     if record.sellReasons.contains(reason) {
                                         Image(systemName: "checkmark")
-                                            .foregroundStyle(.orange)
+                                            .foregroundColor(.orange)
                                             .fontWeight(.bold)
                                     }
                                 }
