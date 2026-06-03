@@ -70,7 +70,7 @@ struct ListView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
+            ZStack {
                 if isCompletelyEmptyForSituation {
                     VStack {
                         Spacer()
@@ -92,7 +92,10 @@ struct ListView: View {
                     }
                 }
                 
-                bottomAddRecordButton
+                VStack {
+                    Spacer()
+                    bottomAddRecordButton
+                }
             }
             .scrollContentBackground(.hidden)
             .background(Color(.systemBackground))
@@ -216,8 +219,8 @@ struct ListView: View {
                             
                             Spacer()
                             
-                            VStack(alignment: .listRowSeparatorLeading, spacing: 8) {
-                                Text("理由：\(record.situation == .buy ? record.buyReason.localizedName(customNames: customBuyReasons) : record.sellReason.localizedName(customNames: customSellReasons))")
+                            VStack(alignment: .trailing, spacing: 8) {
+                                Text("理由：\(formatReasons(for: record))")
                                     .font(.headline)
                                 
                                 HStack(spacing: 2) {
@@ -277,7 +280,25 @@ struct ListView: View {
             .shadow(color: (selectedSituation == .buy ? Color.blue : Color.orange).opacity(0.25), radius: 3, x: 0, y: 2)
         }
         .padding(.vertical, 12)
-        .background(Color(.systemBackground))
+        .background(.clear)
+    }
+    
+    private func formatReasons(for record: Record) -> String {
+        if record.situation == .buy {
+            guard let firstReason = record.buyReasons.first else { return "なし" }
+            let firstName = firstReason.localizedName(customNames: customBuyReasons)
+            if record.buyReasons.count > 1 {
+                return "\(firstName) 他\(record.buyReasons.count - 1)"
+            }
+            return firstName
+        } else {
+            guard let firstReason = record.sellReasons.first else { return "なし" }
+            let firstName = firstReason.localizedName(customNames: customSellReasons)
+            if record.sellReasons.count > 1 {
+                return "\(firstName) 他\(record.sellReasons.count - 1)"
+            }
+            return firstName
+        }
     }
     
     func deleteRecords(at offsets: IndexSet, from filteredList: [Record]) {
@@ -300,8 +321,8 @@ struct ListView: View {
             sellPrice: 0.0,
             quantity: 100,
             situation: isBuy ? .buy : .sell,
-            buyReason: .others,
-            sellReason: .others,
+            buyReasons: [.others],
+            sellReasons: [.others],
             note: "",
             rating: 0,
             reflection: ""

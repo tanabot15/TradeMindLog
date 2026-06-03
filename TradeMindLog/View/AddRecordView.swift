@@ -14,6 +14,14 @@ struct AddRecordView: View {
     
     @AppStorage("customBuyReasons") private var customBuyReasons: [String] = []
     @AppStorage("customSellReasons") private var customSellReasons: [String] = []
+    @AppStorage("reflectionTemplate") private var reflectionTemplate: String = """
+        【1. 当初の想定と違った点】
+        
+        【2. 今回の気付き・反省点】
+        
+        【3. 次回にどう活かすか】
+        
+        """
             
     @Bindable var record: Record
     let isNew: Bool
@@ -27,15 +35,6 @@ struct AddRecordView: View {
         case price
     }
     @FocusState private var focusedField: Field?
-    
-    @AppStorage("reflectionTemplate") private var reflectionTemplate: String = """
-        【1. 当初の想定と違った点】
-        
-        【2. 今回の気付き・反省点】
-        
-        【3. 次回にどう活かすか】
-        
-        """
     
     var body: some View {
         NavigationStack {
@@ -90,14 +89,18 @@ struct AddRecordView: View {
                 }
                 
                 Section("取引情報") {
-                    Picker("Situation", selection: $record.situation) {
-                        Text("購入").tag(Situation.buy)
-                        Text("売却").tag(Situation.sell)
+                    if isNew {
+                        Picker("Situation", selection: $record.situation) {
+                            Text("購入").tag(Situation.buy)
+                            Text("売却").tag(Situation.sell)
+                        }
+                        .pickerStyle(SegmentedPickerStyle())
+                    } else {
+                        Text("取引別：　\(record.situation.rawValue)")
                     }
-                    .pickerStyle(SegmentedPickerStyle())
                     
                     if record.situation == .buy {
-                        DatePicker("購入日", selection: Binding(
+                        DatePicker("購入日：", selection: Binding(
                             get: { record.buyDate ?? Date() },
                             set: { record.buyDate = $0 }
                         ), displayedComponents: .date)
@@ -126,19 +129,39 @@ struct AddRecordView: View {
                     Stepper("株式数：    \(record.quantity)", value: $record.quantity, in: 100...100000, step: 100)
                 }
                 
-                Section("売買理由") {
+                Section("売買理由（複数選択可）") {
                     if record.situation == .buy {
-                        Picker("購入理由を選んでください", selection: $record.buyReason) {
-                            ForEach(BuyReason.allCases) { reason in
-                                Text(reason.localizedName(customNames: customBuyReasons)).tag(reason)
-                                
+                        ForEach(BuyReason.allCases) { reason in
+                            Button {
+                                toggleBuyReason(reason)
+                            } label: {
+                                HStack {
+                                    Text(reason.localizedName(customNames: customBuyReasons))
+                                        .foregroundColor(.primary)
+                                    Spacer()
+                                    if record.buyReasons.contains(reason) {
+                                        Image(systemName: "checkmark")
+                                            .foregroundColor(.blue)
+                                            .fontWeight(.bold)
+                                    }
+                                }
                             }
                         }
                     } else {
-                        Picker("売却理由を選んでください", selection: $record.sellReason) {
-                            ForEach(SellReason.allCases) { reason in
-                                Text(reason.localizedName(customNames: customSellReasons)).tag(reason)
-                                
+                        ForEach(SellReason.allCases) { reason in
+                            Button {
+                                toggleSellReason(reason)
+                            } label: {
+                                HStack {
+                                    Text(reason.localizedName(customNames: customSellReasons))
+                                        .foregroundColor(.primary)
+                                    Spacer()
+                                    if record.sellReasons.contains(reason) {
+                                        Image(systemName: "checkmark")
+                                            .foregroundStyle(.orange)
+                                            .fontWeight(.bold)
+                                    }
+                                }
                             }
                         }
                     }
@@ -242,6 +265,22 @@ struct AddRecordView: View {
         }
     }
     
+    private func toggleBuyReason(_ reason: BuyReason) {
+        if record.buyReasons.contains(reason) {
+            record.buyReasons.removeAll { $0 == reason }
+        } else {
+            record.buyReasons.append(reason)
+        }
+    }
+    
+    private func toggleSellReason(_ reason: SellReason) {
+        if record.sellReasons.contains(reason) {
+            record.sellReasons.removeAll { $0 == reason }
+        } else {
+            record.sellReasons.append(reason)
+        }
+    }
+    
     private func insertTemplate() {
         if record.reflection.isEmpty {
             record.reflection = reflectionTemplate
@@ -263,8 +302,8 @@ struct AddRecordView: View {
         sellPrice: 1200.0,
         quantity: 200,
         situation: .buy,
-        buyReason: .highProfitMargin,
-        sellReason: .profitTaking,
+        buyReasons: [.highProfitMargin, .technicalAnalysis],
+        sellReasons: [.profitTaking],
         note: "memomemomemo",
         rating: 3,
         reflection: ""
@@ -272,7 +311,7 @@ struct AddRecordView: View {
     
     container.mainContext.insert(testRecord)
     
-    return AddRecordView(record: testRecord, isNew: false)
+    return AddRecordView(record: testRecord, isNew: true)
         .modelContainer(container)
 //        .preferredColorScheme(.dark)
 }

@@ -82,8 +82,8 @@ class SettingViewModel: ObservableObject {
             let sellDateStr = record.sellDate != nil ? formatter.string(from: record.sellDate!) : ""
             let sellPrice = record.sellPrice
             
-            let buyReason = record.buyReason.localizedName(customNames: customBuyReasons)
-            let sellReason = record.sellReason.localizedName(customNames: customSellReasons)
+            let buyReason = record.buyReasons.map { $0.rawValue }.joined(separator: "|")
+            let sellReason = record.sellReasons.map { $0.rawValue }.joined(separator: "|")
             
             let note = "\"\(record.note.replacingOccurrences(of: "\"", with: "\"\""))\""
             let rating = record.rating
@@ -148,8 +148,10 @@ class SettingViewModel: ObservableObject {
                 let sellDate = dateFormatter.date(from: fields[7])
                 let sellPrice = Double(fields[8]) ?? 0.0
                 
-                let buyReason = BuyReason.allCases.first { $0.localizedName(customNames: customBuyReasons) == fields[10] } ?? .others
-                let sellReason = SellReason.allCases.first { $0.localizedName(customNames: customSellReasons) == fields[11] } ?? .others
+                let buyReasonsRaw = fields[9].components(separatedBy: "|")
+                let buyReasons = buyReasonsRaw.compactMap { BuyReason(rawValue: $0) }
+                let sellReasonsRaw = fields[10].components(separatedBy: "|")
+                let sellReasons = sellReasonsRaw.compactMap { SellReason(rawValue: $0) }
                 
                 let note = fields[12]
                 let rating = Int(fields[13]) ?? 0
@@ -165,8 +167,8 @@ class SettingViewModel: ObservableObject {
                     sellPrice: sellPrice,
                     quantity: quantity,
                     situation: situation,
-                    buyReason: buyReason,
-                    sellReason: sellReason,
+                    buyReasons: buyReasons.isEmpty ? [.others] : buyReasons,
+                    sellReasons: sellReasons.isEmpty ? [.others] : sellReasons,
                     note: note,
                     rating: rating,
                     reflection: reflection

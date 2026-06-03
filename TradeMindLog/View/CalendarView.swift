@@ -113,7 +113,7 @@ struct CalendarView: View {
                             Spacer()
                             
                             VStack(alignment: .trailing, spacing: 8) {
-                                Text("理由：\(record.situation == .buy ? record.buyReason.localizedName(customNames: customBuyReasons) : record.sellReason.localizedName(customNames: customSellReasons))")
+                                Text("理由：\(formatReasons(for: record))")
                                     .font(.headline)
                                 
                                 HStack(spacing: 2) {
@@ -139,6 +139,24 @@ struct CalendarView: View {
                 }
                 .onDelete(perform: { offsets in deleteSpecificRecords(at: offsets, from: records) })
             }
+        }
+    }
+    
+    private func formatReasons(for record: Record) -> String {
+        if record.situation == .buy {
+            guard let firstReason = record.buyReasons.first else { return "なし" }
+            let firstName = firstReason.localizedName(customNames: customBuyReasons)
+            if record.buyReasons.count > 1 {
+                return "\(firstName) 他\(record.buyReasons.count - 1)"
+            }
+            return firstName
+        } else {
+            guard let firstReason = record.sellReasons.first else { return "なし" }
+            let firstName = firstReason.localizedName(customNames: customSellReasons)
+            if record.sellReasons.count > 1 {
+                return "\(firstName) 他\(record.sellReasons.count - 1)"
+            }
+            return firstName
         }
     }
     
@@ -254,8 +272,8 @@ struct CalendarView: View {
             sellPrice: 0.0,
             quantity: 100,
             situation: .buy,
-            buyReason: .others,
-            sellReason: .others,
+            buyReasons: [.others],
+            sellReasons: [.others],
             note: "",
             rating: 0,
             reflection: ""

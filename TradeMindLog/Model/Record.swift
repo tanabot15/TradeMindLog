@@ -57,12 +57,24 @@ class Record {
     var buyPrice: Double
     var sellPrice: Double
     var quantity: Int
-    var buyReason: BuyReason
-    var sellReason: SellReason
     var situation: Situation
+    
+    var buyReasonRawValues: [String] = []
+    var sellReasonRawValues: [String] = []
+    
     var note: String
     var rating: Int
     var reflection: String
+    
+    var buyReasons: [BuyReason] {
+        get { buyReasonRawValues.compactMap { BuyReason(rawValue: $0) } }
+        set { buyReasonRawValues = newValue.map { $0.rawValue } }
+    }
+    
+    var sellReasons: [SellReason] {
+        get { sellReasonRawValues.compactMap { SellReason(rawValue: $0) } }
+        set { sellReasonRawValues = newValue.map { $0.rawValue } }
+    }
     
     init(
         id: UUID,
@@ -74,8 +86,8 @@ class Record {
         sellPrice: Double,
         quantity: Int,
         situation: Situation,
-        buyReason: BuyReason,
-        sellReason: SellReason,
+        buyReasons: [BuyReason] = [.others],
+        sellReasons: [SellReason] = [.others],
         note: String,
         rating: Int = 0,
         reflection: String
@@ -89,8 +101,8 @@ class Record {
         self.sellPrice = sellPrice
         self.quantity = quantity
         self.situation = situation
-        self.buyReason = buyReason
-        self.sellReason = sellReason
+        self.buyReasonRawValues = buyReasons.map { $0.rawValue }
+        self.sellReasonRawValues = sellReasons.map { $0.rawValue }
         self.note = note
         self.rating = rating
         self.reflection = reflection

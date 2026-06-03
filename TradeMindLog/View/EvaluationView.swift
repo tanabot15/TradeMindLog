@@ -53,7 +53,7 @@ struct EvaluationView: View {
     var evaluationResults: [ReasonEvaluationData] {
         if selectedSituation == .buy {
             return BuyReason.allCases.map { reason in
-                let targetRecords = filteredRecords.filter { $0.buyReason == reason }
+                let targetRecords = filteredRecords.filter { $0.buyReasons.contains(reason) }
                 let name = reason.localizedName(customNames: customBuyReasons)
                 return calculateAverage(records: targetRecords, name: name)
             }
@@ -61,7 +61,7 @@ struct EvaluationView: View {
             .sorted { $0.averageRating > $1.averageRating }
         } else {
             return SellReason.allCases.map { reason in
-                let targetRecords = filteredRecords.filter { $0.sellReason == reason }
+                let targetRecords = filteredRecords.filter { $0.sellReasons.contains(reason) }
                 let name = reason.localizedName(customNames: customSellReasons)
                 return calculateAverage(records: targetRecords, name: name)
             }

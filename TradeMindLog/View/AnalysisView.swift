@@ -50,35 +50,32 @@ struct AnalysisView: View {
     }
     
     var currentStats: [Stat] {
-        let totalCount = filteredRecords.count
-        guard totalCount > 0 else { return [] }
-        
         if selectedSituation == .buy {
-            var counts: [BuyReason: Int] = [:]
-            for r in filteredRecords {
-                counts[r.buyReason, default: 0] += 1
-            }
-            return BuyReason.allCases.map { reason in
-                let count = counts[reason, default: 0]
-                let pct = (Double(count) / Double(totalCount)) * 100.0
+            let buyStats = BuyReason.allCases.map { reason -> (String, Int) in
+                let count = filteredRecords.filter { $0.buyReasons.contains(reason) }.count
                 let name = reason.localizedName(customNames: customBuyReasons)
-                return Stat(reason: name, count: count, percentage: pct)
-            }
-            .filter { $0.count > 0 }
-            .sorted { $0.count > $1.count }
+                return (name, count)
+            }.filter { $0.1 > 0 }
+            
+            let totalVotes = buyStats.reduce(0) { $0 + $1.1 }
+            guard totalVotes > 0 else { return [] }
+            
+            return buyStats.map { name, count in
+                Stat(reason: name, count: count, percentage: (Double(count) / Double(totalVotes)) * 100)
+            }.sorted { $0.count > $1.count }
         } else {
-            var counts: [SellReason: Int] = [:]
-            for r in filteredRecords {
-                counts[r.sellReason, default: 0] += 1
-            }
-            return SellReason.allCases.map { reason in
-                let count = counts[reason, default: 0]
-                let pct = (Double(count) / Double(totalCount)) * 100.0
+            let sellStats = SellReason.allCases.map { reason -> (String, Int) in
+                let count = filteredRecords.filter { $0.sellReasons.contains(reason) }.count
                 let name = reason.localizedName(customNames: customSellReasons)
-                return Stat(reason: name, count: count, percentage: pct)
-            }
-            .filter { $0.count > 0 }
-            .sorted { $0.count > $1.count }
+                return (name, count)
+            }.filter { $0.1 > 0 }
+            
+            let totalVotes = sellStats.reduce(0) { $0 + $1.1 }
+            guard totalVotes > 0 else { return [] }
+            
+            return sellStats.map { name, count in
+                Stat(reason: name, count: count, percentage: (Double(count) / Double(totalVotes)) * 100)
+            }.sorted { $0.count > $1.count }
         }
     }
     
@@ -100,6 +97,8 @@ struct AnalysisView: View {
                 } else {
                     ScrollView {
                         VStack(spacing: 20) {
+                            
+                            // Pie Chart Card
                             VStack {
                                 Text("\(selectedSituation.rawValue)理由の比率")
                                     .font(.subheadline)
@@ -152,8 +151,9 @@ struct AnalysisView: View {
                             .background(Color(.secondarySystemBackground))
                             .cornerRadius(12)
                             
+                            // Stats Breakdown List Card
                             VStack(alignment: .leading) {
-                                Text("売買理由の集計詳細")
+                                Text("統計データ")
                                     .font(.headline)
                                     .padding(.horizontal)
                                     .padding(.top, 10)
@@ -170,7 +170,7 @@ struct AnalysisView: View {
                                             
                                             Spacer()
                                             
-                                            Text("\(stat.count) 回")
+                                            Text("\(stat.count) 件")
                                                 .font(.body)
                                                 .bold()
                                             
