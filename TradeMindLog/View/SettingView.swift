@@ -112,7 +112,7 @@ private extension SettingView {
                     Spacer()
                     Image(systemName: "link")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
             }
         }
@@ -136,10 +136,10 @@ private extension SettingView {
             } label: {
                 HStack {
                     Text("売買理由のカスタマイズ")
-                        .foregroundColor(.primary)
+                        .foregroundStyle(Color.primary)
                     Spacer()
                     Image(systemName: "chevron.right")
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(Color.secondary)
                 }
             }
             
@@ -148,10 +148,10 @@ private extension SettingView {
             } label: {
                 HStack {
                     Text("振り返りテンプレートのカスタマイズ")
-                        .foregroundColor(.primary)
+                        .foregroundStyle(Color.primary)
                     Spacer()
                     Image(systemName: "chevron.right")
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(Color.secondary)
                 }
             }
             
@@ -166,10 +166,10 @@ private extension SettingView {
             } label: {
                 HStack {
                     Text("CSVファイルをエクスポート")
-                        .foregroundColor(.primary)
+                        .foregroundStyle(Color.primary)
                     Spacer()
                     Image(systemName: "square.and.arrow.up")
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(Color.secondary)
                 }
             }
             
@@ -178,10 +178,10 @@ private extension SettingView {
             } label: {
                 HStack {
                     Text("CSVファイルをインポート")
-                        .foregroundColor(.primary)
+                        .foregroundStyle(Color.primary)
                     Spacer()
                     Image(systemName: "square.and.arrow.down")
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(Color.secondary)
                 }
             }
             
@@ -204,28 +204,28 @@ private extension SettingView {
                 Spacer()
                 // change when updating
                 Text("3.0")
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
             }
             
             Link(destination: viewModel.termsOfServiceURL) {
                 HStack {
                     Text("ご利用規約")
-                        .foregroundColor(.primary)
+                        .foregroundStyle(Color.primary)
                     Spacer()
                     Image(systemName: "link")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(Color.secondary)
                 }
             }
                                 
             Link(destination: viewModel.privacyPolicyURL) {
                 HStack {
                     Text("プライバシー ポリシー")
-                        .foregroundColor(.primary)
+                        .foregroundStyle(Color.primary)
                     Spacer()
                     Image(systemName: "link")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(Color.secondary)
                 }
             }
         }
@@ -235,7 +235,7 @@ private extension SettingView {
         Section {
             Text("© 2026 Tanabot")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .center)
         }
         .listRowBackground(Color.clear)
@@ -319,7 +319,7 @@ struct TemplateEditSheetView: View {
                     Button("売買理由を初期値に戻す", role: .destructive) {
                         isShowingResetAlert = true
                     }
-                    .foregroundColor(.red)
+                    .foregroundStyle(.red)
                 }
             }
             .navigationTitle("振り返りテンプレートのカスタマイズ")

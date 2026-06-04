@@ -123,7 +123,7 @@ struct CalendarView: View {
                                     if let extraCount = getExtraReasonsCount(for: record) {
                                         Text(" 他\(extraCount)")
                                             .font(.caption)
-                                            .foregroundColor(.secondary)
+                                            .foregroundStyle(.secondary)
                                     }
                                 }
                                 
@@ -134,7 +134,7 @@ struct CalendarView: View {
                                     if record.rating > 0 {
                                         ForEach(1...5, id: \.self) { star in
                                             Image(systemName: star <= record.rating ? "star.fill" : "star")
-                                                .foregroundColor(.yellow)
+                                                .foregroundStyle(.yellow)
                                                 .font(.caption2)
                                         }
                                     } else {

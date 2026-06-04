@@ -47,34 +47,36 @@ struct AnalysisView: View {
         let reason: String
         let count: Int
         let percentage: Double
+        let buyReasonKey: BuyReason?
+        let sellReasonKey: SellReason?
     }
     
     var currentStats: [Stat] {
         if selectedSituation == .buy {
-            let buyStats = BuyReason.allCases.map { reason -> (String, Int) in
+            let buyStats = BuyReason.allCases.map { reason -> (BuyReason, String, Int) in
                 let count = filteredRecords.filter { $0.buyReasons.contains(reason) }.count
                 let name = reason.localizedName(customNames: customBuyReasons)
-                return (name, count)
-            }.filter { $0.1 > 0 }
+                return (reason, name, count)
+            }.filter { $0.2 > 0 }
             
-            let totalVotes = buyStats.reduce(0) { $0 + $1.1 }
+            let totalVotes = buyStats.reduce(0) { $0 + $1.2 }
             guard totalVotes > 0 else { return [] }
             
-            return buyStats.map { name, count in
-                Stat(reason: name, count: count, percentage: (Double(count) / Double(totalVotes)) * 100)
+            return buyStats.map { reason, name, count in
+                Stat(reason: name, count: count, percentage: (Double(count) / Double(totalVotes)) * 100, buyReasonKey: reason, sellReasonKey: nil)
             }.sorted { $0.count > $1.count }
         } else {
-            let sellStats = SellReason.allCases.map { reason -> (String, Int) in
+            let sellStats = SellReason.allCases.map { reason -> (SellReason, String, Int) in
                 let count = filteredRecords.filter { $0.sellReasons.contains(reason) }.count
                 let name = reason.localizedName(customNames: customSellReasons)
-                return (name, count)
-            }.filter { $0.1 > 0 }
+                return (reason, name, count)
+            }.filter { $0.2 > 0 }
             
-            let totalVotes = sellStats.reduce(0) { $0 + $1.1 }
+            let totalVotes = sellStats.reduce(0) { $0 + $1.2 }
             guard totalVotes > 0 else { return [] }
             
-            return sellStats.map { name, count in
-                Stat(reason: name, count: count, percentage: (Double(count) / Double(totalVotes)) * 100)
+            return sellStats.map { reason, name, count in
+                Stat(reason: name, count: count, percentage: (Double(count) / Double(totalVotes)) * 100, buyReasonKey: nil, sellReasonKey: reason)
             }.sorted { $0.count > $1.count }
         }
     }
@@ -97,20 +99,19 @@ struct AnalysisView: View {
                 } else {
                     ScrollView {
                         VStack(spacing: 20) {
-                            
                             // Pie Chart Card
                             VStack {
                                 Text("\(selectedSituation.rawValue)理由の比率")
                                     .font(.subheadline)
+                                    .fontWeight(.bold)
                                     .foregroundStyle(.secondary)
-                                    .bold()
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .padding()
                                 
                                 ZStack {
                                     Chart(Array(currentStats.enumerated()), id: \.element.id) { index, stat in
                                         SectorMark (
-                                            angle: .value("count", stat.count),
+                                            angle: .value("Count", stat.count),
                                             innerRadius: .ratio(0.5),
                                             angularInset: 1
                                         )
@@ -152,14 +153,19 @@ struct AnalysisView: View {
                             .cornerRadius(12)
                             
                             // Stats Breakdown List Card
-                            VStack(alignment: .leading) {
+                            VStack(alignment: .leading, spacing: 12) {
                                 Text("統計データ")
-                                    .font(.headline)
-                                    .padding(.horizontal)
-                                    .padding(.top, 10)
+                                    .font(.subheadline)
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(.secondary)
                                 
-                                VStack(spacing: 0) {
-                                    ForEach(Array(currentStats.enumerated()), id: \.element.id) { index,stat in
+                                ForEach(Array(currentStats.enumerated()), id: \.element.id) { index, stat in
+                                    NavigationLink(destination: ReasonDetailListView(
+                                        targetReasonName: stat.reason,
+                                        buyReason: stat.buyReasonKey,
+                                        sellReason: stat.sellReasonKey,
+                                        allFilteredRecords: filteredRecords
+                                    )) {
                                         HStack(spacing: 12) {
                                             Circle()
                                                 .fill(chartColors[index % chartColors.count])
@@ -167,26 +173,28 @@ struct AnalysisView: View {
                                             
                                             Text(stat.reason)
                                                 .font(.body)
+                                                .foregroundStyle(Color.primary)
                                             
                                             Spacer()
                                             
                                             Text("\(stat.count) 件")
                                                 .font(.body)
                                                 .bold()
+                                                .foregroundStyle(Color.primary)
                                             
-                                            Text(String(format: "%.1f%%", stat.percentage))
-                                                .font(.subheadline)
+                                            Image(systemName: "chevron.right")
+                                                .font(.body)
                                                 .foregroundStyle(.secondary)
-                                                .frame(width: 60, alignment: .trailing)
                                         }
-                                        .padding()
-                                        
-                                        if index < currentStats.count - 1 {
-                                            Divider()
-                                        }
+                                        .padding(.vertical, 6)
+                                    }
+                                    
+                                    if index < currentStats.count - 1 {
+                                        Divider()
                                     }
                                 }
                             }
+                            .padding()
                             .background(Color(.secondarySystemBackground))
                             .cornerRadius(12)
                         }

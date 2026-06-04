@@ -161,17 +161,17 @@ struct ListView: View {
             }) {
                 HStack {
                     Image(systemName: showUnratedOnly ? "exclamationmark.triangle.fill" : "exclamationmark.triangle")
-                        .foregroundColor(.pink)
+                        .foregroundStyle(.pink)
                     
                     Text(showUnratedOnly ? "振り返り待ちの \(unratedCount) 件を表示中（タップで解除）" : "振り返り待ちのレコードが \(unratedCount) 件あります")
                         .font(.subheadline)
                         .fontWeight(.medium)
-                        .foregroundColor(.primary)
+                        .foregroundStyle(Color.primary)
                     
                     Spacer()
                     
                     Image(systemName: showUnratedOnly ? "xmark.circle.fill" : "chevron.right")
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                         .font(.footnote)
                 }
                 .padding()
@@ -230,7 +230,7 @@ struct ListView: View {
                                     if let extraCount = getExtraReasonsCount(for: record) {
                                         Text("他\(extraCount)")
                                             .font(.caption)
-                                            .foregroundColor(.secondary)
+                                            .foregroundStyle(.secondary)
                                     }
                                 }
                                 
@@ -241,7 +241,7 @@ struct ListView: View {
                                     if record.rating > 0 {
                                         ForEach(1...5, id: \.self) { star in
                                             Image(systemName: star <= record.rating ? "star.fill" : "star")
-                                                .foregroundColor(.yellow)
+                                                .foregroundStyle(.yellow)
                                                 .font(.caption2)
                                         }
                                     } else {

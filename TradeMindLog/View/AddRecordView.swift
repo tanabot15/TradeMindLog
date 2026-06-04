@@ -46,7 +46,7 @@ struct AddRecordView: View {
                             HStack(spacing: 8) {
                                 ForEach(1...5, id: \.self) { star in
                                     Image(systemName: star <= record.rating ? "star.fill" : "star")
-                                        .foregroundColor(.yellow)
+                                        .foregroundStyle(.yellow)
                                         .font(.title3)
                                         .onTapGesture {
                                             record.rating = star
@@ -137,11 +137,11 @@ struct AddRecordView: View {
                             } label: {
                                 HStack {
                                     Text(reason.localizedName(customNames: customBuyReasons))
-                                        .foregroundColor(.primary)
+                                        .foregroundStyle(Color.primary)
                                     Spacer()
                                     if record.buyReasons.contains(reason) {
                                         Image(systemName: "checkmark")
-                                            .foregroundColor(.blue)
+                                            .foregroundStyle(.blue)
                                             .fontWeight(.bold)
                                     }
                                 }
@@ -154,11 +154,11 @@ struct AddRecordView: View {
                             } label: {
                                 HStack {
                                     Text(reason.localizedName(customNames: customSellReasons))
-                                        .foregroundColor(.primary)
+                                        .foregroundStyle(Color.primary)
                                     Spacer()
                                     if record.sellReasons.contains(reason) {
                                         Image(systemName: "checkmark")
-                                            .foregroundColor(.orange)
+                                            .foregroundStyle(.orange)
                                             .fontWeight(.bold)
                                     }
                                 }
@@ -171,7 +171,7 @@ struct AddRecordView: View {
                         .overlay(alignment: .topLeading) {
                             if record.note.isEmpty {
                                 Text("なぜ売買したのか、その時の感情や判断をメモしましょう")
-                                    .foregroundColor(.gray)
+                                    .foregroundStyle(.gray)
                             }
                         }
                 }

@@ -14,7 +14,8 @@ struct ReasonEvaluationData: Identifiable {
     let reasonName: String
     let averageRating: Double
     let count: Int
-    
+    let buyReasonKey: BuyReason?
+    let sellReasonKey: SellReason?
 }
 
 struct EvaluationView: View {
@@ -55,7 +56,7 @@ struct EvaluationView: View {
             return BuyReason.allCases.map { reason in
                 let targetRecords = filteredRecords.filter { $0.buyReasons.contains(reason) }
                 let name = reason.localizedName(customNames: customBuyReasons)
-                return calculateAverage(records: targetRecords, name: name)
+                return calculateAverage(records: targetRecords, name: name, buyKey: reason, sellKey: nil)
             }
             .filter { $0.count > 0 }
             .sorted { $0.averageRating > $1.averageRating }
@@ -63,7 +64,7 @@ struct EvaluationView: View {
             return SellReason.allCases.map { reason in
                 let targetRecords = filteredRecords.filter { $0.sellReasons.contains(reason) }
                 let name = reason.localizedName(customNames: customSellReasons)
-                return calculateAverage(records: targetRecords, name: name)
+                return calculateAverage(records: targetRecords, name: name, buyKey: nil, sellKey: reason)
             }
             .filter { $0.count > 0 }
             .sorted { $0.averageRating > $1.averageRating }
@@ -102,11 +103,11 @@ struct EvaluationView: View {
                                     VStack(alignment: .leading, spacing: 6) {
                                         HStack(spacing: 6) {
                                             Image(systemName: "checkmark.seal.fill")
-                                                .foregroundColor(.green)
+                                                .foregroundStyle(.green)
                                             Text("最優秀パターン")
                                                 .font(.caption)
                                                 .fontWeight(.bold)
-                                                .foregroundColor(.secondary)
+                                                .foregroundStyle(.secondary)
                                         }
                                         
                                         Text(best.reasonName)
@@ -118,13 +119,13 @@ struct EvaluationView: View {
                                             Text(String(format: "%.1f", best.averageRating))
                                                 .font(.system(.title, design: .rounded))
                                                 .fontWeight(.bold)
-                                                .foregroundColor(.green)
+                                                .foregroundStyle(.green)
                                             Image(systemName: "star.fill")
-                                                .foregroundColor(.green)
+                                                .foregroundStyle(.green)
                                                 .font(.caption)
                                             Text("(\(best.count)件)")
                                                 .font(.caption2)
-                                                .foregroundColor(.secondary)
+                                                .foregroundStyle(.secondary)
                                         }
                                     }
                                     .padding()
@@ -146,7 +147,7 @@ struct EvaluationView: View {
                                             Text("要改善パターン")
                                                 .font(.caption)
                                                 .fontWeight(.bold)
-                                                .foregroundColor(.secondary)
+                                                .foregroundStyle(.secondary)
                                         }
                                         
                                         Text(worst.reasonName)
@@ -158,13 +159,13 @@ struct EvaluationView: View {
                                             Text(String(format: "%.1f", worst.averageRating))
                                                 .font(.system(.title, design: .rounded))
                                                 .fontWeight(.bold)
-                                                .foregroundColor(.pink)
+                                                .foregroundStyle(.pink)
                                             Image(systemName: "star.fill")
-                                                .foregroundColor(.pink)
+                                                .foregroundStyle(.pink)
                                                 .font(.caption)
                                             Text("(\(worst.count)件)")
                                                 .font(.caption2)
-                                                .foregroundColor(.secondary)
+                                                .foregroundStyle(.secondary)
                                         }
                                     }
                                     .padding()
@@ -195,7 +196,7 @@ struct EvaluationView: View {
                                         Text(String(format: "%.1f★", data.averageRating))
                                             .font(.caption)
                                             .bold()
-                                            .foregroundColor(.secondary)
+                                            .foregroundStyle(.secondary)
                                             .padding(.leading, 4)
                                     }
                                 }
@@ -216,38 +217,50 @@ struct EvaluationView: View {
                                     .font(.subheadline)
                                     .fontWeight(.bold)
                                 
-                                ForEach(Array(evaluationResults.enumerated()), id: \.element.id) { index, data in
-                                    HStack {
-                                        Text("\(index + 1)")
-                                            .font(.caption)
-                                            .bold()
-                                            .foregroundStyle(.primary)
-                                            .frame(width: 20, height: 20)
-                                            .background(index == 0 ? Color.yellow : (index == 1 ? Color.gray : Color.secondary))
-                                            .clipShape(Circle())
-                                        
-                                        Text(data.reasonName)
-                                            .font(.subheadline)
-                                        
-                                        Spacer()
-                                        
-                                        HStack(spacing: 2) {
-                                            Text("平均")
-                                            Text(String(format: "%.1f", data.averageRating))
-                                                .bold()
-                                            Image(systemName: "star.fill")
-                                                .foregroundColor(.yellow)
-                                                .font(.caption)
-                                            Text("(\(data.count)件)")
-                                                .font(.caption2)
-                                                .foregroundColor(.secondary)
+                                ForEach(evaluationResults) { data in
+                                    NavigationLink(destination: ReasonDetailListView(
+                                        targetReasonName: data.reasonName,
+                                        buyReason: data.buyReasonKey,
+                                        sellReason: data.sellReasonKey,
+                                        allFilteredRecords: filteredRecords
+                                    )) {
+                                        HStack {
+//                                            Text("\(index + 1)")
+//                                                .font(.caption)
+//                                                .bold()
+//                                                .foregroundStyle(.primary)
+//                                                .frame(width: 20, height: 20)
+//                                                .background(index == 0 ? Color.yellow : (index == 1 ? Color.gray : Color.secondary))
+//                                                .clipShape(Circle())
+                                            
+                                            Text(data.reasonName)
+                                                .foregroundStyle(Color.primary)
+                                                .font(.subheadline)
+                                            
+                                            Spacer()
+                                            
+                                            HStack(spacing: 4) {
+                                                Text(String(format: "%.1f", data.averageRating))
+                                                    .foregroundStyle(Color.primary)
+                                                    .font(.headline)
+                                                    .bold()
+                                                Image(systemName: "star.fill")
+                                                    .foregroundStyle(.yellow)
+                                                    .font(.caption)
+                                                Text("(\(data.count)件)")
+                                                    .font(.body)
+                                                    .foregroundStyle(Color.secondary)
+                                                Image(systemName: "chevron.right")
+                                                    .font(.body)
+                                                    .foregroundStyle(.secondary)
+
+                                            }
                                         }
-                                        .font(.subheadline)
+                                        .padding(.horizontal)
+                                        .padding(.vertical, 4)
                                     }
-                                    .padding(.horizontal)
-                                    .padding(.vertical, 4)
                                     
-                                    if index < evaluationResults.count - 1 {
+                                    if data.id != evaluationResults.last?.id {
                                         Divider()
                                     }
                                 }
@@ -290,23 +303,23 @@ struct EvaluationView: View {
         }
     }
     
-    private func calculateAverage(records: [Record], name: String) -> ReasonEvaluationData {
+    private func calculateAverage(records: [Record], name: String, buyKey: BuyReason?, sellKey: SellReason?) -> ReasonEvaluationData {
         let totalCount = records.count
         
         if totalCount == 0 {
-            return ReasonEvaluationData(reasonName: name, averageRating: 0.0, count: 0)
+            return ReasonEvaluationData(reasonName: name, averageRating: 0.0, count: 0, buyReasonKey: buyKey, sellReasonKey: sellKey)
         }
         
         let ratedRecords = records.filter { $0.rating > 0 }
         
         if ratedRecords.isEmpty {
-            return ReasonEvaluationData(reasonName: name, averageRating: 0.0, count: totalCount)
+            return ReasonEvaluationData(reasonName: name, averageRating: 0.0, count: totalCount, buyReasonKey: buyKey, sellReasonKey: sellKey)
         }
         
         let totalRating = ratedRecords.reduce(0) { $0 + $1.rating }
         let average = Double(totalRating) / Double(ratedRecords.count)
         
-        return ReasonEvaluationData(reasonName: name, averageRating: average, count: totalCount)
+        return ReasonEvaluationData(reasonName: name, averageRating: average, count: totalCount, buyReasonKey: buyKey, sellReasonKey: sellKey)
     }
 }
 
