@@ -10,6 +10,7 @@
 		D95970882FC52FEF000EB2D3 /* EvaluationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95970872FC52FEF000EB2D3 /* EvaluationView.swift */; };
 		D959708C2FC93AC8000EB2D3 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D959708B2FC93AC8000EB2D3 /* EmptyStateView.swift */; };
 		D95970902FD14FED000EB2D3 /* ReasonDetailListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D959708F2FD14FED000EB2D3 /* ReasonDetailListView.swift */; };
+		D95970922FD23BFB000EB2D3 /* ReasonTagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95970912FD23BFB000EB2D3 /* ReasonTagsView.swift */; };
 		D9A9394B2FC0264A00D3DFF3 /* SettingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9A9394A2FC0264A00D3DFF3 /* SettingViewModel.swift */; };
 		D9BBBAA32FB4A26600E05A0C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D9BBBA9F2FB4A26600E05A0C /* Assets.xcassets */; };
 		D9BBBAA42FB4A26600E05A0C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9BBBAA02FB4A26600E05A0C /* ContentView.swift */; };
@@ -28,6 +29,7 @@
 		D95970872FC52FEF000EB2D3 /* EvaluationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EvaluationView.swift; sourceTree = "<group>"; };
 		D959708B2FC93AC8000EB2D3 /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		D959708F2FD14FED000EB2D3 /* ReasonDetailListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReasonDetailListView.swift; sourceTree = "<group>"; };
+		D95970912FD23BFB000EB2D3 /* ReasonTagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReasonTagsView.swift; sourceTree = "<group>"; };
 		D9A9394A2FC0264A00D3DFF3 /* SettingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingViewModel.swift; sourceTree = "<group>"; };
 		D9BBBA912FB4A25400E05A0C /* TradeMindLog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TradeMindLog.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D9BBBA9F2FB4A26600E05A0C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -97,6 +99,7 @@
 			children = (
 				D9BBBAA02FB4A26600E05A0C /* ContentView.swift */,
 				D9BBBAAE2FB4A47700E05A0C /* ListView.swift */,
+				D95970912FD23BFB000EB2D3 /* ReasonTagsView.swift */,
 				D9BBBAB02FB4A48700E05A0C /* CalendarView.swift */,
 				D9BBBAB22FB4A49E00E05A0C /* AddRecordView.swift */,
 				D9BBBAB42FB4A4A900E05A0C /* AnalysisView.swift */,
@@ -187,6 +190,7 @@
 				D9BBBAB32FB4A49E00E05A0C /* AddRecordView.swift in Sources */,
 				D9BBBAB12FB4A48700E05A0C /* CalendarView.swift in Sources */,
 				D959708C2FC93AC8000EB2D3 /* EmptyStateView.swift in Sources */,
+				D95970922FD23BFB000EB2D3 /* ReasonTagsView.swift in Sources */,
 				D9BBBAA52FB4A26600E05A0C /* TradeMindLogApp.swift in Sources */,
 				D9BBBAAF2FB4A47700E05A0C /* ListView.swift in Sources */,
 				D95970902FD14FED000EB2D3 /* ReasonDetailListView.swift in Sources */,
@@ -332,7 +336,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 23;
 				DEVELOPMENT_TEAM = D86GFNUD35;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -348,7 +352,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1;
+				MARKETING_VERSION = 3.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.suzuki.kenichiro.TradeMindLog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -371,7 +375,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 23;
 				DEVELOPMENT_TEAM = D86GFNUD35;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -387,7 +391,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1;
+				MARKETING_VERSION = 3.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.suzuki.kenichiro.TradeMindLog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

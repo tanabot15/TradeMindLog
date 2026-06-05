@@ -100,4 +100,5 @@ struct ReasonDetailListView: View {
             allFilteredRecords: SampleData.records)
     }
     .modelContainer(previewContainer)
+//    .preferredColorScheme(.dark)
 }

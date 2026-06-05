@@ -95,37 +95,15 @@ struct CalendarView: View {
             Section(header: Text(title)) {
                 ForEach(records) { record in
                     NavigationLink(destination: AddRecordView(record: record, isNew: false)) {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 0) {
+                        VStack(spacing: 4) {
+                            HStack {
                                 Text(record.tickerCode)
                                     .font(.footnote)
                                 Text(record.stockName)
                                     .font(.title2)
                                     .fontWeight(.semibold)
-                                HStack {
-                                    Text(" \(record.quantity)株")
-                                    Text("/")
-                                    Text("\(record.situation == .buy ? record.buyPrice : record.sellPrice, specifier: "%.0f") 円")
-                                }
-                                .font(.callout)
-                            }
-                            
-                            Spacer()
-                            
-                            VStack(alignment: .trailing, spacing: 8) {
-                                HStack(spacing: 2) {
-                                    Text("理由：")
-                                        .font(.headline)
-                                    
-                                    Text(formatFirstReason(for: record))
-                                        .font(.headline)
-                                    
-                                    if let extraCount = getExtraReasonsCount(for: record) {
-                                        Text(" 他\(extraCount)")
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
-                                    }
-                                }
+                                
+                                Spacer()
                                 
                                 HStack(spacing: 2) {
                                     Text("評価：")
@@ -138,11 +116,17 @@ struct CalendarView: View {
                                                 .font(.caption2)
                                         }
                                     } else {
-                                        Text("未実施")
+                                        Text("未実施         ")
                                             .font(.subheadline)
                                             .italic()
                                     }
                                 }
+                            }
+                            
+                            HStack {
+                                Text("理由：")
+                                    .font(.caption)
+                                ReasonTagsView(record: record)
                             }
                         }
                     }
