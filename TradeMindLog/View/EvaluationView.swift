@@ -27,8 +27,14 @@ struct EvaluationView: View {
     @Binding var selectedSituation: Situation
     @Binding var selectedTimeFilter: TimeFilter
     
+    @State private var isShowingFilterSheet = false
+    
     private var isCompletelyEmptyForSituation: Bool {
         !records.contains { $0.situation == selectedSituation }
+    }
+    
+    private var isAnyFilterActive: Bool {
+        selectedTimeFilter != .all
     }
     
     var filteredRecords: [Record] {
@@ -225,13 +231,8 @@ struct EvaluationView: View {
                                         allFilteredRecords: filteredRecords
                                     )) {
                                         HStack {
-//                                            Text("\(index + 1)")
-//                                                .font(.caption)
-//                                                .bold()
-//                                                .foregroundStyle(.primary)
-//                                                .frame(width: 20, height: 20)
-//                                                .background(index == 0 ? Color.yellow : (index == 1 ? Color.gray : Color.secondary))
-//                                                .clipShape(Circle())
+                                            Circle()
+                                                .frame(width: 10, height: 10)
                                             
                                             Text(data.reasonName)
                                                 .foregroundStyle(Color.primary)
@@ -285,22 +286,60 @@ struct EvaluationView: View {
                 }
                 
                 ToolbarItem(placement: .topBarTrailing) {
-                    Menu {
-                        Picker("期間", selection: $selectedTimeFilter) {
-                            ForEach(TimeFilter.allCases) { filter in
-                                Text(filter.rawValue).tag(filter)
-                            }
-                        }
+                    Button {
+                        isShowingFilterSheet = true
                     } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "line.3.horizontal.decrease.circle")
-                            Text(selectedTimeFilter.rawValue)
-                                .font(.subheadline)
+                        Image(systemName: "line.3.horizontal.decrease.circle")
+                            .fontWeight(isAnyFilterActive ? .semibold : .regular)
+                            .foregroundStyle(isAnyFilterActive ? .blue : .primary)
+                        
+                    }
+                }
+            }
+            .sheet(isPresented: $isShowingFilterSheet) {
+                filterSheet
+            }
+        }
+    }
+    
+    // Filter Sheet
+    @ViewBuilder
+    private var filterSheet: some View {
+        NavigationStack {
+            Form {
+                Section(header: Text("期間")) {
+                    Picker("期間", selection: $selectedTimeFilter) {
+                        ForEach(TimeFilter.allCases) { filter in
+                            Text(filter.rawValue).tag(filter)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
+            }
+            .navigationTitle("フィルター")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("完了") {
+                        isShowingFilterSheet = false
+                    }
+                }
+                
+                ToolbarItem(placement: .topBarLeading) {
+                    if isAnyFilterActive {
+                        Button {
+                            withAnimation {
+                                selectedTimeFilter = .all
+                                isShowingFilterSheet = false
+                            }
+                        } label: {
+                            Text("クリア")
                         }
                     }
                 }
             }
         }
+        .presentationDetents([.medium, .large])
     }
     
     private func calculateAverage(records: [Record], name: String, buyKey: BuyReason?, sellKey: SellReason?) -> ReasonEvaluationData {

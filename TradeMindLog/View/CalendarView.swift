@@ -264,8 +264,8 @@ struct CalendarView: View {
             sellPrice: 0.0,
             quantity: 100,
             situation: .buy,
-            buyReasons: [.others],
-            sellReasons: [.others],
+            buyReasons: [],
+            sellReasons: [],
             note: "",
             rating: 0,
             reflection: ""

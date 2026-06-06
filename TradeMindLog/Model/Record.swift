@@ -86,8 +86,8 @@ class Record {
         sellPrice: Double,
         quantity: Int,
         situation: Situation,
-        buyReasons: [BuyReason] = [.others],
-        sellReasons: [SellReason] = [.others],
+        buyReasons: [BuyReason] = [],
+        sellReasons: [SellReason] = [],
         note: String,
         rating: Int = 0,
         reflection: String
