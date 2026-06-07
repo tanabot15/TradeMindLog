@@ -203,7 +203,7 @@ private extension SettingView {
                 Text("Version")
                 Spacer()
                 // change when updating
-                Text("3.3")
+                Text("3.4")
                     .foregroundStyle(.secondary)
             }
             

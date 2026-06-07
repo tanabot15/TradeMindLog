@@ -234,11 +234,11 @@ struct ListView: View {
                     NavigationLink(destination: AddRecordView(record: record, isNew: false)) {
                         VStack(spacing: 4) {
                             HStack {
-                                Text(record.tickerCode)
-                                    .font(.footnote)
                                 Text(record.stockName)
                                     .font(.title2)
                                     .fontWeight(.semibold)
+                                Text(record.tickerCode)
+                                    .font(.footnote)
                                 
                                 Spacer()
                                 

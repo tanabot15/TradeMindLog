@@ -219,7 +219,7 @@ struct EvaluationView: View {
                                                         
                             // detail list
                             VStack(alignment: .leading,spacing: 12) {
-                                Text("傾向評価")
+                                Text("統計データ")
                                     .font(.subheadline)
                                     .fontWeight(.bold)
                                 
