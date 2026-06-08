@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D95970882FC52FEF000EB2D3 /* EvaluationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95970872FC52FEF000EB2D3 /* EvaluationView.swift */; };
 		D959708C2FC93AC8000EB2D3 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D959708B2FC93AC8000EB2D3 /* EmptyStateView.swift */; };
 		D95970902FD14FED000EB2D3 /* ReasonDetailListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D959708F2FD14FED000EB2D3 /* ReasonDetailListView.swift */; };
 		D95970922FD23BFB000EB2D3 /* ReasonTagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95970912FD23BFB000EB2D3 /* ReasonTagsView.swift */; };
@@ -26,7 +25,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		D95970872FC52FEF000EB2D3 /* EvaluationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EvaluationView.swift; sourceTree = "<group>"; };
 		D959708B2FC93AC8000EB2D3 /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		D959708F2FD14FED000EB2D3 /* ReasonDetailListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReasonDetailListView.swift; sourceTree = "<group>"; };
 		D95970912FD23BFB000EB2D3 /* ReasonTagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReasonTagsView.swift; sourceTree = "<group>"; };
@@ -103,7 +101,6 @@
 				D9BBBAB02FB4A48700E05A0C /* CalendarView.swift */,
 				D9BBBAB22FB4A49E00E05A0C /* AddRecordView.swift */,
 				D9BBBAB42FB4A4A900E05A0C /* AnalysisView.swift */,
-				D95970872FC52FEF000EB2D3 /* EvaluationView.swift */,
 				D9BBBAB62FB4A4B700E05A0C /* SettingView.swift */,
 				D959708F2FD14FED000EB2D3 /* ReasonDetailListView.swift */,
 				D959708B2FC93AC8000EB2D3 /* EmptyStateView.swift */,
@@ -186,7 +183,6 @@
 			files = (
 				D9BBBAA42FB4A26600E05A0C /* ContentView.swift in Sources */,
 				D9BBBAB72FB4A4B700E05A0C /* SettingView.swift in Sources */,
-				D95970882FC52FEF000EB2D3 /* EvaluationView.swift in Sources */,
 				D9BBBAB32FB4A49E00E05A0C /* AddRecordView.swift in Sources */,
 				D9BBBAB12FB4A48700E05A0C /* CalendarView.swift in Sources */,
 				D959708C2FC93AC8000EB2D3 /* EmptyStateView.swift in Sources */,
@@ -336,7 +332,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 25;
+				CURRENT_PROJECT_VERSION = 26;
 				DEVELOPMENT_TEAM = D86GFNUD35;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -352,7 +348,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.4;
+				MARKETING_VERSION = 3.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.suzuki.kenichiro.TradeMindLog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -375,7 +371,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 25;
+				CURRENT_PROJECT_VERSION = 26;
 				DEVELOPMENT_TEAM = D86GFNUD35;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -391,7 +387,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.4;
+				MARKETING_VERSION = 3.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.suzuki.kenichiro.TradeMindLog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

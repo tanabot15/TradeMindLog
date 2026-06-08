@@ -131,7 +131,8 @@ struct ListView: View {
             }
             .scrollContentBackground(.hidden)
             .background(Color(.systemBackground))
-            .navigationTitle("トレードレコード")
+            .navigationTitle(selectedSituation == .buy ? "購入トレード一覧" : "売却トレード一覧")
+            .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic), prompt: "銘柄名またはコードで検索")
             .onChange(of: selectedSituation) { oldValue, newValue in
                 searchText = ""

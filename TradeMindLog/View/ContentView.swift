@@ -25,7 +25,7 @@ struct ContentView: View {
                 selectedTimeFilter: $sharedTimeFilter
             )
             .tabItem {
-                Label("レコード", systemImage: "list.bullet")
+                Label("一覧", systemImage: "list.bullet")
             }
             .badge(totalUnratedCount > 0 ? totalUnratedCount : 0)
             
@@ -35,14 +35,7 @@ struct ContentView: View {
             )
             .tabItem {
                 Label("分析", systemImage: "chart.pie")
-            }
-            
-            EvaluationView(
-                selectedSituation: $sharedSituation,
-                selectedTimeFilter: $sharedTimeFilter
-            )
-            .tabItem {
-                Label("評価", systemImage: "chart.bar.yaxis")
+                    .environment(\.symbolVariants, .none)
             }
             
             SettingView()
