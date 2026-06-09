@@ -36,6 +36,7 @@ struct AddRecordView: View {
     }
     @FocusState private var focusedField: Field?
     
+    // MARK: - Main View
     var body: some View {
         NavigationStack {
             Form {
@@ -265,6 +266,7 @@ struct AddRecordView: View {
         }
     }
     
+    // MARK: - Functions
     private func toggleBuyReason(_ reason: BuyReason) {
         if record.buyReasons.contains(reason) {
             record.buyReasons.removeAll { $0 == reason }

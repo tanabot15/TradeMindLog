@@ -35,6 +35,7 @@ struct SettingView: View {
     @State private var isShowingReasonEditSheet = false
     @State private var isShowingTemplateEditSheet = false
     
+    // MARK: - ReasonEditSheetView
     var body: some View {
         NavigationStack {
             List {
@@ -45,7 +46,6 @@ struct SettingView: View {
                 footerSection
             }
             .navigationTitle("設定")
-            // sheet modifier
             .sheet(isPresented: $isShowingReasonEditSheet) {
                 ReasonEditSheetView(
                     customBuyReasons: $customBuyReasons,
@@ -83,7 +83,6 @@ struct SettingView: View {
                     print("CSV selection error: \(error.localizedDescription)")
                 }
             }
-            // alert modifier
             .alert("CSVをインポートします", isPresented: $viewModel.isShowingImportAlert) {
                 Button("OK", role: .cancel) { }
             } message: {
@@ -101,9 +100,8 @@ struct SettingView: View {
     }
 }
 
-// MARK: Subviews (Section)
+// MARK: - Subviews (Section)
 private extension SettingView {
-    
     private var experimentSection: some View {
         Section(header: Text("このアプリはこの実験から始まった...")) {
             Link(destination: viewModel.experimentURL) {
@@ -203,7 +201,7 @@ private extension SettingView {
                 Text("Version")
                 Spacer()
                 // change when updating
-                Text("3.5")
+                Text("3.6")
                     .foregroundStyle(.secondary)
             }
             
@@ -242,7 +240,6 @@ private extension SettingView {
     }
 }
 
-// MARK: ReasonEditSheetView
 struct ReasonEditSheetView: View {
     @Environment(\.dismiss) private var dismiss
     
@@ -251,18 +248,37 @@ struct ReasonEditSheetView: View {
     
     @State private var isShowingResetAlert = false
     
+    // MARK: - Main View
     var body: some View {
         NavigationStack {
             Form {
                 Section(header: Text("購入理由")) {
                     ForEach(0..<customBuyReasons.count, id: \.self) { index in
-                        TextField("理由を入力", text: $customBuyReasons[index])
+                        HStack(spacing: 12) {
+                            let reasonKey = BuyReason.allCases[index]
+                            let themeColor = reasonKey.color(customNames: customBuyReasons)
+                            
+                            Circle()
+                                .fill(themeColor)
+                                .frame(width: 12, height: 12)
+                            
+                            TextField("理由を入力", text: $customBuyReasons[index])
+                        }
                     }
                 }
                 
                 Section(header: Text("売却理由")) {
                     ForEach(0..<customSellReasons.count, id: \.self) { index in
-                        TextField("理由を入力", text: $customSellReasons[index])
+                        HStack(spacing: 12) {
+                            let reasonKey = SellReason.allCases[index]
+                            let themeColor = reasonKey.color(customNames: customSellReasons)
+                            
+                            Circle()
+                                .fill(themeColor)
+                                .frame(width: 12, height: 12)
+                            
+                            TextField("理由を入力", text: $customSellReasons[index])
+                        }
                     }
                 }
                 
@@ -299,7 +315,7 @@ struct ReasonEditSheetView: View {
     }
 }
 
-// MARK: TemplateEditSheetView
+// MARK: - TemplateEditSheetView
 struct TemplateEditSheetView: View {
     @Environment(\.dismiss) private var dismiss
     

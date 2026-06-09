@@ -39,6 +39,7 @@ struct CalendarView: View {
         return (buy, sell)
     }
     
+    // MARK: - Main View
     var body: some View {
         NavigationStack {
             List {
@@ -88,7 +89,8 @@ struct CalendarView: View {
         }
     }
     
-    // Section
+    // MARK: - Other Views
+    // Record View
     @ViewBuilder
     private func recordSection(title: String, records: [Record], color: Color) -> some View {
         if !records.isEmpty {
@@ -158,7 +160,7 @@ struct CalendarView: View {
         }
     }
     
-    // UICalendarView Wrapper
+    // MARK: - UICalendarView Wrapper
     struct CalendarViewRepresentable: UIViewRepresentable {
         let records: [Record]
         let firstWeekday: Int
@@ -244,7 +246,7 @@ struct CalendarView: View {
         }
     }
     
-    func deleteRecords(at offsets: IndexSet) {
+    private func deleteRecords(at offsets: IndexSet) {
         for offset in offsets {
             let record = records[offset]
             modelContext.delete(record)

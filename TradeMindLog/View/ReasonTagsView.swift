@@ -21,14 +21,14 @@ struct ReasonTagsView: View {
                     ForEach(record.buyReasons) { reason in
                         tagCapsule(
                             name: reason.localizedName(customNames: customBuyReasons),
-                            color: .blue
+                            color: reason.color(customNames: customBuyReasons)
                         )
                     }
                 } else {
                     ForEach(record.sellReasons) { reason in
                         tagCapsule(
                             name: reason.localizedName(customNames: customSellReasons),
-                            color: .orange
+                            color: reason.color(customNames: customSellReasons)
                         )
                     }
                 }
@@ -44,7 +44,7 @@ struct ReasonTagsView: View {
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .foregroundStyle(.primary)
-            .background(color.opacity(0.4))
+            .background(color.opacity(0.2))
             .clipShape(Capsule())
             .overlay(
                 Capsule()

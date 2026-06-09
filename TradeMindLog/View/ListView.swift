@@ -100,6 +100,7 @@ struct ListView: View {
         currentSituationRecords.filter { $0.rating == 0 }.count
     }
     
+    // MARK: - Main View
     var body: some View {
         NavigationStack {
             ZStack {
@@ -181,6 +182,7 @@ struct ListView: View {
         }
     }
     
+    // MARK: - Sub Views
     // Notification Banner View
     @ViewBuilder
     private var notificationBannerView: some View {
@@ -277,7 +279,7 @@ struct ListView: View {
         }
     }
     
-    // bottomAddRecordButton
+    // Add Botton
     @ViewBuilder
     private var bottomAddRecordButton: some View {
         Button {
@@ -309,7 +311,7 @@ struct ListView: View {
         .background(.clear)
     }
     
-    // Filter Sheet
+    // Filter Sheet View
     @ViewBuilder
     private var filterSheet: some View {
         NavigationStack {
@@ -403,6 +405,7 @@ struct ListView: View {
         .presentationDetents([.medium, .large])
     }
     
+    // MARK: - Other Functions
     private func formatFirstReason(for record: Record) -> String {
         if record.situation == .buy {
             guard let firstReason = record.buyReasons.first else { return "なし" }
@@ -418,7 +421,7 @@ struct ListView: View {
         return count > 1 ? (count - 1) : nil
     }
     
-    func deleteRecords(at offsets: IndexSet, from filteredList: [Record]) {
+    private func deleteRecords(at offsets: IndexSet, from filteredList: [Record]) {
         for offset in offsets {
             let record = filteredList[offset]
             modelContext.delete(record)

@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftData
+import SwiftUI
 
 enum BuyReason: String, Codable, CaseIterable, Identifiable {
     case valuationAttractive = "割安性"
@@ -46,6 +47,10 @@ enum TimeFilter: String, CaseIterable, Identifiable {
     
     var id: String { self.rawValue }
 }
+
+private let reasonColors: [Color] = [
+    .teal, .orange, .green, .cyan, .yellow, .indigo, .mint
+]
 
 @Model
 class Record {
@@ -144,5 +149,27 @@ extension SellReason {
             return customNames[index]
         }
         return self.rawValue
+    }
+}
+
+extension BuyReason {
+    func color(customNames: [String]) -> Color {
+        let allNames = BuyReason.allCases.map { $0.localizedName(customNames: customNames) }
+        let currentName = self.localizedName(customNames: customNames)
+        if let index = allNames.firstIndex(of: currentName) {
+            return reasonColors[index % reasonColors.count]
+        }
+        return .gray
+    }
+}
+
+extension SellReason {
+    func color(customNames: [String]) -> Color {
+        let allNames = SellReason.allCases.map { $0.localizedName(customNames: customNames) }
+        let currentName = self.localizedName(customNames: customNames)
+        if let index = allNames.firstIndex(of: currentName) {
+            return reasonColors[index % reasonColors.count]
+        }
+        return .gray
     }
 }

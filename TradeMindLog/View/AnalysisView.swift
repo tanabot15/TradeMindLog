@@ -17,6 +17,7 @@ struct ReasonAnalyticsData: Identifiable {
     let averageRating: Double
     let buyReasonKey: BuyReason?
     let sellReasonKey: SellReason?
+    let themeColor: Color
 }
 
 struct AnalysisView: View {
@@ -29,24 +30,6 @@ struct AnalysisView: View {
     @AppStorage("customSellReasons") private var customSellReasons: [String] = []
     
     @State private var isShowingFilterSheet = false
-    
-    private let reasonColors: [Color] = [
-        .teal, .orange, .green, .cyan, .yellow, .indigo, .mint
-    ]
-    
-    private func color(for reasonName: String) -> Color {
-        let allNames: [String]
-        if selectedSituation == .buy {
-            allNames = BuyReason.allCases.map { $0.localizedName(customNames: customBuyReasons) }
-        } else {
-            allNames = SellReason.allCases.map { $0.localizedName(customNames: customSellReasons) }
-        }
-        
-        if let index = allNames.firstIndex(of: reasonName) {
-            return reasonColors[index % reasonColors.count]
-        }
-        return .gray
-    }
     
     private var isCompletelyEmptyForSituation: Bool {
         !records.contains { $0.situation == selectedSituation }
@@ -120,13 +103,22 @@ struct AnalysisView: View {
             let percent = totalReasonCount > 0 ? (Double(value) / Double(totalReasonCount)) * 100 : 0.0
             let ratingInfo = ratings[key, default: (0, 0)]
             let avg = ratingInfo.ratedCounts > 0 ? Double(ratingInfo.totalStars) / Double(ratingInfo.ratedCounts) : 0.0
+            
+            let color: Color
+            if selectedSituation == .buy {
+                color = buyKeys[key]?.color(customNames: customBuyReasons) ?? .gray
+            } else {
+                color = sellKeys[key]?.color(customNames: customSellReasons) ?? .gray
+            }
+            
             return ReasonAnalyticsData(
                 reasonName: key,
                 count: value,
                 percentage: percent,
                 averageRating: avg,
                 buyReasonKey: buyKeys[key],
-                sellReasonKey: sellKeys[key]
+                sellReasonKey: sellKeys[key],
+                themeColor: color
             )
         }
     }
@@ -150,7 +142,7 @@ struct AnalysisView: View {
         return rated.count > 2 ? rated.last : nil
     }
     
-    // MARK: Main View
+    // MARK: - Main View
     var body: some View {
         NavigationStack {            
             VStack(spacing: 12) {
@@ -206,7 +198,7 @@ struct AnalysisView: View {
         }
     }
     
-    // MARK: Sub Views
+    // MARK: - Sub Views
     // Pie Chart Section
     @ViewBuilder
     private var pieChartSection: some View {
@@ -225,7 +217,7 @@ struct AnalysisView: View {
                         angularInset: 1
                     )
                     .cornerRadius(5)
-                    .foregroundStyle(color(for: stat.reasonName))
+                    .foregroundStyle(stat.themeColor)
                     .annotation(position: .overlay) {
                         if stat.percentage > 10 {
                             VStack {
@@ -252,6 +244,8 @@ struct AnalysisView: View {
                         .foregroundStyle(.primary)
                 }
             }
+            
+            
         }
         .padding()
         .background(Color(.secondarySystemBackground))
@@ -355,7 +349,7 @@ struct AnalysisView: View {
                     x: .value("評価", data.averageRating),
                     y: .value("理由", data.reasonName)
                 )
-                .foregroundStyle(color(for: data.reasonName).gradient)
+                .foregroundStyle(data.themeColor.gradient)
                 .cornerRadius(4)
                 .annotation(position: .trailing, alignment: .leading) {
                     Text(String(format: "%.1f★", data.averageRating))
@@ -397,7 +391,7 @@ struct AnalysisView: View {
                     HStack {
                         Circle()
                             .frame(width: 10, height: 10)
-                            .foregroundStyle(color(for: stat.reasonName))
+                            .foregroundStyle(stat.themeColor)
                         
                         Text(stat.reasonName)
                             .font(.subheadline)
