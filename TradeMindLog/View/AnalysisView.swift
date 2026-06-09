@@ -9,22 +9,14 @@ import SwiftUI
 import SwiftData
 import Charts
 
-struct ReasonEvaluationData: Identifiable {
+struct ReasonAnalyticsData: Identifiable {
     let id = UUID()
     let reasonName: String
-    let averageRating: Double
-    let count: Int
-    let buyReasonKey: BuyReason?
-    let sellReasonKey: SellReason?
-}
-
-struct StatData: Identifiable {
-    let id = UUID()
-    let reason: String
     let count: Int
     let percentage: Double
-    let buyReason: BuyReason?
-    let sellReason: SellReason?
+    let averageRating: Double
+    let buyReasonKey: BuyReason?
+    let sellReasonKey: SellReason?
 }
 
 struct AnalysisView: View {
@@ -37,6 +29,24 @@ struct AnalysisView: View {
     @AppStorage("customSellReasons") private var customSellReasons: [String] = []
     
     @State private var isShowingFilterSheet = false
+    
+    private let reasonColors: [Color] = [
+        .teal, .orange, .green, .cyan, .yellow, .indigo, .mint
+    ]
+    
+    private func color(for reasonName: String) -> Color {
+        let allNames: [String]
+        if selectedSituation == .buy {
+            allNames = BuyReason.allCases.map { $0.localizedName(customNames: customBuyReasons) }
+        } else {
+            allNames = SellReason.allCases.map { $0.localizedName(customNames: customSellReasons) }
+        }
+        
+        if let index = allNames.firstIndex(of: reasonName) {
+            return reasonColors[index % reasonColors.count]
+        }
+        return .gray
+    }
     
     private var isCompletelyEmptyForSituation: Bool {
         !records.contains { $0.situation == selectedSituation }
@@ -66,7 +76,7 @@ struct AnalysisView: View {
         }
     }
     
-    private var aggregatedData: (stats: [StatData], evaluations: [ReasonEvaluationData]) {
+    private var aggregatedData: [ReasonAnalyticsData] {
         let currentRecords = filteredRecords
         
         var counts: [String: Int] = [:]
@@ -106,43 +116,41 @@ struct AnalysisView: View {
             }
         }
         
-        let stats = counts.map { key, value in
+        return counts.map { key, value in
             let percent = totalReasonCount > 0 ? (Double(value) / Double(totalReasonCount)) * 100 : 0.0
-            return StatData(
-                reason: key,
-                count: value,
-                percentage: percent,
-                buyReason: buyKeys[key],
-                sellReason: sellKeys[key]
-            )
-        }.sorted { $0.count > $1.count }
-        
-        let evaluations = counts.map { key, count in
             let ratingInfo = ratings[key, default: (0, 0)]
             let avg = ratingInfo.ratedCounts > 0 ? Double(ratingInfo.totalStars) / Double(ratingInfo.ratedCounts) : 0.0
-            return ReasonEvaluationData(reasonName: key, averageRating: avg, count: count, buyReasonKey: buyKeys[key], sellReasonKey: sellKeys[key])
-        }.sorted { $0.averageRating > $1.averageRating }
-        
-        return (stats, evaluations)
+            return ReasonAnalyticsData(
+                reasonName: key,
+                count: value,
+                percentage: percent,
+                averageRating: avg,
+                buyReasonKey: buyKeys[key],
+                sellReasonKey: sellKeys[key]
+            )
+        }
     }
     
-    private var currentStat: [StatData] { aggregatedData.stats }
-    private var evaluationData: [ReasonEvaluationData] { aggregatedData.evaluations }
-    
-    private var activeEvaluationData: [ReasonEvaluationData] {
-        evaluationData.filter { $0.count > 0 }
+    private var scoreSortedStat: [ReasonAnalyticsData] {
+        aggregatedData.sorted {
+            if $0.averageRating == $1.averageRating {
+                return $0.count > $1.count
+            }
+            return $0.averageRating > $1.averageRating
+        }
     }
     
-    var bestReason: ReasonEvaluationData? {
-        let rated = evaluationData.filter { $0.averageRating > 0 }
+    var bestReason: ReasonAnalyticsData? {
+        let rated = scoreSortedStat.filter { $0.averageRating > 0 }
         return rated.first
     }
     
-    var worstReason: ReasonEvaluationData? {
-        let rated = evaluationData.filter { $0.averageRating > 0 }
+    var worstReason: ReasonAnalyticsData? {
+        let rated = scoreSortedStat.filter { $0.averageRating > 0 }
         return rated.count > 2 ? rated.last : nil
     }
     
+    // MARK: Main View
     var body: some View {
         NavigationStack {            
             VStack(spacing: 12) {
@@ -198,6 +206,7 @@ struct AnalysisView: View {
         }
     }
     
+    // MARK: Sub Views
     // Pie Chart Section
     @ViewBuilder
     private var pieChartSection: some View {
@@ -209,18 +218,18 @@ struct AnalysisView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             ZStack {
-                Chart(currentStat.filter { $0.count > 0 }) { stat in
+                Chart(scoreSortedStat.filter { $0.count > 0 }) { stat in
                     SectorMark(
                         angle: .value("Count", stat.count),
                         innerRadius: .ratio(0.4),
                         angularInset: 1
                     )
                     .cornerRadius(5)
-                    .foregroundStyle(by: .value("Reason", stat.reason))
+                    .foregroundStyle(color(for: stat.reasonName))
                     .annotation(position: .overlay) {
                         if stat.percentage > 10 {
                             VStack {
-                                Text("\(stat.reason)")
+                                Text("\(stat.reasonName)")
                                 Text(String(format: "%.0f%%", stat.percentage))
                             }
                             .font(.caption2)
@@ -341,12 +350,12 @@ struct AnalysisView: View {
                 .font(.subheadline)
                 .fontWeight(.bold)
             
-            Chart(evaluationData.filter{ $0.count > 0 }) { data in
+            Chart(scoreSortedStat.filter{ $0.count > 0 }) { data in
                 BarMark(
                     x: .value("評価", data.averageRating),
                     y: .value("理由", data.reasonName)
                 )
-                .foregroundStyle(selectedSituation == .buy ? Color.blue.gradient : Color.orange.gradient)
+                .foregroundStyle(color(for: data.reasonName).gradient)
                 .cornerRadius(4)
                 .annotation(position: .trailing, alignment: .leading) {
                     Text(String(format: "%.1f★", data.averageRating))
@@ -360,7 +369,7 @@ struct AnalysisView: View {
             .chartXAxis {
                 AxisMarks(values: [0, 1, 2, 3, 4, 5])
             }
-            .frame(height: CGFloat(max(100, evaluationData.filter { $0.count > 0 }.count * 50)))
+            .frame(height: CGFloat(max(100, scoreSortedStat.filter { $0.count > 0 }.count * 50)))
             .padding(.trailing, 30)
         }
         .padding()
@@ -376,31 +385,49 @@ struct AnalysisView: View {
                 .font(.subheadline)
                 .fontWeight(.bold)
             
-            ForEach(currentStat) { stat in
+            ForEach(scoreSortedStat.filter { $0.count > 0 }) { stat in
                 NavigationLink(destination: {
                     ReasonDetailListView(
-                        targetReasonName: stat.reason,
-                        buyReason: stat.buyReason,
-                        sellReason: stat.sellReason,
+                        targetReasonName: stat.reasonName,
+                        buyReason: stat.buyReasonKey,
+                        sellReason: stat.sellReasonKey,
                         allFilteredRecords: filteredRecords,
                     )
                 }) {
                     HStack {
                         Circle()
                             .frame(width: 10, height: 10)
-                            .foregroundStyle(selectedSituation == .buy ? .blue : .orange)
-                        Text(stat.reason)
+                            .foregroundStyle(color(for: stat.reasonName))
+                        
+                        Text(stat.reasonName)
                             .font(.subheadline)
                             .foregroundStyle(.primary)
+                        
                         Spacer()
+                        
+                        HStack(spacing: 2) {
+                            Text(String(format: "%.1f", stat.averageRating))
+                                .font(.subheadline)
+                                .fontWeight(.bold)
+                                .foregroundStyle(.primary)
+                            Image(systemName: "star.fill")
+                                .font(.caption2)
+                                .foregroundStyle(.yellow)
+                        }
+                        
+                        Spacer()
+                            .frame(width: 20)
+                        
                         Text("\(stat.count)件")
                             .font(.subheadline)
                             .fontWeight(.bold)
                             .foregroundStyle(.secondary)
+                        
                         Text(String(format: "(%.1f%%)", stat.percentage))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .frame(width: 60, alignment: .trailing)
+                        
                         Image(systemName: "chevron.right")
                             .font(.caption2)
                             .foregroundStyle(Color.secondary)
