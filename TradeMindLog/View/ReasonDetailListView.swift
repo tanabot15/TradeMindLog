@@ -51,8 +51,9 @@ struct ReasonDetailListView: View {
                                     if record.rating > 0 {
                                         ForEach(1...5, id: \.self) { star in
                                             Image(systemName: star <= record.rating ? "star.fill" : "star")
-                                                .foregroundStyle(.yellow)
                                                 .font(.caption2)
+                                                .fontWeight(.bold)
+                                                .foregroundStyle(.yellow)
                                         }
                                     } else {
                                         Text("未実施         ")
@@ -69,19 +70,12 @@ struct ReasonDetailListView: View {
                             }
                         }
                     }
+                    .listRowBackground(record.situation == .buy ? Color.blue.opacity(0.30) : Color.orange.opacity(0.30))
                 }
             }
         }
         .navigationTitle(targetReasonName)
         .navigationBarTitleDisplayMode(.inline)
-    }
-    
-    private func formatAllReasons(for record: Record) -> String {
-        if record.situation == .buy {
-            return record.buyReasons.map { $0.localizedName(customNames: customBuyReasons) }.joined(separator: ", ")
-        } else {
-            return record.sellReasons.map { $0.localizedName(customNames: customSellReasons) }.joined(separator: ", ")
-        }
     }
 }
 

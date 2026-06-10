@@ -30,24 +30,31 @@ struct AnalysisView: View {
     @AppStorage("customSellReasons") private var customSellReasons: [String] = []
     
     @State private var isShowingFilterSheet = false
+    @State private var selectedBuyFilters: Set<BuyReason> = []
+    @State private var selectedSellFilters: Set<SellReason> = []
+    @State private var isAndFilterMode = false
     
     private var isCompletelyEmptyForSituation: Bool {
         !records.contains { $0.situation == selectedSituation }
     }
     
+    private var isReasonFilterActive: Bool {
+        selectedSituation == .buy ? !selectedBuyFilters.isEmpty : !selectedSellFilters.isEmpty
+    }
+    
     private var isAnyFilterActive: Bool {
-        selectedTimeFilter != .all
+        isReasonFilterActive || selectedTimeFilter != .all
     }
     
     private var filteredRecords: [Record] {
         let situationRecords = records.filter { $0.situation == selectedSituation }
-        if selectedTimeFilter == .all { return situationRecords }
         
         let now = Date()
         let calendar = Calendar.current
         
-        return situationRecords.filter { record in
-            let targetDate = (record.situation == .buy ? record.buyDate : record.sellDate) ?? now
+        let timeFiltered = situationRecords.filter { record in
+            if selectedTimeFilter == .all { return true }
+            let targetDate = (record.situation == .buy ? record.buyDate : record.sellDate) ?? .now
             switch selectedTimeFilter {
             case .all:
                 return true
@@ -55,6 +62,26 @@ struct AnalysisView: View {
                 return calendar.isDate(targetDate, equalTo: now, toGranularity: .year)
             case .thisMonth:
                 return calendar.isDate(targetDate, equalTo: now, toGranularity: .month)
+            }
+        }
+        
+        if selectedSituation == .buy {
+            if selectedBuyFilters.isEmpty { return timeFiltered }
+            return timeFiltered.filter { record in
+                if isAndFilterMode {
+                    return selectedBuyFilters.isSubset(of: record.buyReasons)
+                } else {
+                    return !selectedBuyFilters.isDisjoint(with: record.buyReasons)
+                }
+            }
+        } else {
+            if selectedSellFilters.isEmpty { return timeFiltered }
+            return timeFiltered.filter { record in
+                if isAndFilterMode {
+                    return selectedSellFilters.isSubset(of: record.sellReasons)
+                } else {
+                    return !selectedSellFilters.isDisjoint(with: record.sellReasons)
+                }
             }
         }
     }
@@ -125,10 +152,15 @@ struct AnalysisView: View {
     
     private var scoreSortedStat: [ReasonAnalyticsData] {
         aggregatedData.sorted {
-            if $0.averageRating == $1.averageRating {
+            if $0.averageRating != $1.averageRating {
+                return $0.averageRating > $1.averageRating
+            }
+            
+            if $0.count != $1.count {
                 return $0.count > $1.count
             }
-            return $0.averageRating > $1.averageRating
+            
+            return $0.reasonName > $1.reasonName
         }
     }
     
@@ -451,6 +483,61 @@ struct AnalysisView: View {
                     }
                     .pickerStyle(.segmented)
                 }
+                
+                Section(header: Text("売買理由")) {
+                    Picker("検索条件", selection: $isAndFilterMode) {
+                        Text("OR検索").tag(false)
+                        Text("AND検索").tag(true)
+                    }
+                    .pickerStyle(.segmented)
+                    
+                    if selectedSituation == .buy {
+                        ForEach(BuyReason.allCases) { reason in
+                            Button {
+                                if selectedBuyFilters.contains(reason) {
+                                    selectedBuyFilters.remove(reason)
+                                } else {
+                                    selectedBuyFilters.insert(reason)
+                                }
+                            } label: {
+                                HStack {
+                                    Circle()
+                                        .fill(reason.color(customNames: customBuyReasons))
+                                        .frame(width: 10, height: 10)
+                                    Text(reason.localizedName(customNames: customBuyReasons))
+                                        .foregroundStyle(Color.primary)
+                                    Spacer()
+                                    if selectedBuyFilters.contains(reason) {
+                                        Image(systemName: "checkmark")
+                                            .bold()
+                                            .foregroundStyle(Color.accentColor)
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        ForEach(SellReason.allCases) { reason in
+                            Button {
+                                if selectedSellFilters.contains(reason) {
+                                    selectedSellFilters.remove(reason)
+                                } else {
+                                    selectedSellFilters.insert(reason)
+                                }
+                            } label: {
+                                HStack {
+                                    Text(reason.localizedName(customNames: customBuyReasons))
+                                        .foregroundStyle(Color.primary)
+                                    Spacer()
+                                    if selectedSellFilters.contains(reason) {
+                                        Image(systemName: "checkmark")
+                                            .bold()
+                                            .foregroundStyle(Color.accentColor)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
             .navigationTitle("フィルター")
             .navigationBarTitleDisplayMode(.inline)
@@ -466,6 +553,9 @@ struct AnalysisView: View {
                         Button {
                             withAnimation {
                                 selectedTimeFilter = .all
+                                selectedBuyFilters.removeAll()
+                                selectedSellFilters.removeAll()
+                                isAndFilterMode = false
                                 isShowingFilterSheet = false
                             }
                         } label: {

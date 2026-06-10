@@ -252,8 +252,9 @@ struct ListView: View {
                                     if record.rating > 0 {
                                         ForEach(1...5, id: \.self) { star in
                                             Image(systemName: star <= record.rating ? "star.fill" : "star")
-                                                .foregroundStyle(.yellow)
                                                 .font(.caption2)
+                                                .fontWeight(.bold)
+                                                .foregroundStyle(.yellow)
                                         }
                                     } else {
                                         Text("未実施         ")
@@ -270,7 +271,7 @@ struct ListView: View {
                             }
                         }
                     }
-                    .listRowBackground(selectedSituation == Situation.buy ? Color.blue.opacity(0.40) : Color.orange.opacity(0.40))
+                    .listRowBackground(selectedSituation == Situation.buy ? Color.blue.opacity(0.30) : Color.orange.opacity(0.30))
                 }
                 .onDelete { offsets in
                     deleteRecords(at: offsets, from: filterRecords)
@@ -326,7 +327,7 @@ struct ListView: View {
                 }
                 
                 Section(header: Text("売買理由")) {
-                    Picker("マッチ条件", selection: $isAndFilterMode) {
+                    Picker("検索条件", selection: $isAndFilterMode) {
                         Text("OR検索").tag(false)
                         Text("AND検索").tag(true)
                     }
@@ -342,6 +343,9 @@ struct ListView: View {
                                 }
                             } label: {
                                 HStack {
+                                    Circle()
+                                        .fill(reason.color(customNames: customBuyReasons))
+                                        .frame(width: 10, height: 10)
                                     Text(reason.localizedName(customNames: customBuyReasons))
                                         .foregroundStyle(Color.primary)
                                     Spacer()
