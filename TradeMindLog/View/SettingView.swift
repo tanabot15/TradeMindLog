@@ -32,10 +32,17 @@ struct SettingView: View {
     
     @AppStorage("showReflectionBanner") private var showReflectionBanner = true
     
+    @AppStorage("showAnalysisPieChart") private var showAnalysisPieChart = true
+    @AppStorage("showAnalysisTrendChart") private var showAnalysisTrendChart = true
+    @AppStorage("showAnalysisBestWorstCards") private var showAnalysisBestWorstCards = true
+    @AppStorage("showAnalysisBarChart") private var showAnalysisBarChart = true
+    @AppStorage("showAnalysisStatsList") private var showAnalysisStatsList = true
+    
     @State private var isShowingReasonEditSheet = false
     @State private var isShowingTemplateEditSheet = false
+    @State private var isShowingAnalysisDisplaySheet = false
     
-    // MARK: - ReasonEditSheetView
+    // MARK: - Main View
     var body: some View {
         NavigationStack {
             List {
@@ -55,6 +62,15 @@ struct SettingView: View {
             .sheet(isPresented: $isShowingTemplateEditSheet) {
                 TemplateEditSheetView(
                     reflectionTemplate: $reflectionTemplate
+                )
+            }
+            .sheet(isPresented: $isShowingAnalysisDisplaySheet) {
+                AnalysisDisplayEditSheetView(
+                    showAnalysisPieChart: $showAnalysisPieChart,
+                    showAnalysisTrendChart: $showAnalysisTrendChart,
+                    showAnalysisBestWorstCards: $showAnalysisBestWorstCards,
+                    showAnalysisBarChart: $showAnalysisBarChart,
+                    showAnalysisStatsList: $showAnalysisStatsList
                 )
             }
             .fileExporter(
@@ -153,8 +169,22 @@ private extension SettingView {
                 }
             }
             
+            Button {
+                isShowingAnalysisDisplaySheet = true
+            } label: {
+                HStack {
+                    Text("分析画面のカスタマイズ")
+                        .foregroundStyle(Color.primary)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .foregroundStyle(Color.secondary)
+                }
+            }
+            
             Toggle("振り返り待ち通知バナーを表示", isOn: $showReflectionBanner)
         }
+        
+        
     }
     
     private var dataManagementSection: some View {
@@ -201,7 +231,7 @@ private extension SettingView {
                 Text("Version")
                 Spacer()
                 // change when updating
-                Text("3.7")
+                Text("3.8")
                     .foregroundStyle(.secondary)
             }
             
@@ -240,6 +270,8 @@ private extension SettingView {
     }
 }
 
+// MARK: - Sheets
+// Reason Edit Sheet
 struct ReasonEditSheetView: View {
     @Environment(\.dismiss) private var dismiss
     
@@ -248,7 +280,6 @@ struct ReasonEditSheetView: View {
     
     @State private var isShowingResetAlert = false
     
-    // MARK: - Main View
     var body: some View {
         NavigationStack {
             Form {
@@ -315,7 +346,7 @@ struct ReasonEditSheetView: View {
     }
 }
 
-// MARK: - TemplateEditSheetView
+// Template Edit Sheet
 struct TemplateEditSheetView: View {
     @Environment(\.dismiss) private var dismiss
     
@@ -360,6 +391,40 @@ struct TemplateEditSheetView: View {
     
     private func resetToDefaultTemplate() {
         self.reflectionTemplate = SettingView.defaultReflectionTemplate
+    }
+}
+
+// Analysis Display Edit Sheet
+struct AnalysisDisplayEditSheetView: View {
+    @Environment(\.dismiss) private var dismiss
+    
+    @Binding var showAnalysisPieChart: Bool
+    @Binding var showAnalysisTrendChart: Bool
+    @Binding var showAnalysisBestWorstCards: Bool
+    @Binding var showAnalysisBarChart: Bool
+    @Binding var showAnalysisStatsList: Bool
+    
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section(header: Text("表示・非表示の切り替え")) {
+                    Toggle("理由の比率（円グラフ）", isOn: $showAnalysisPieChart)
+                    Toggle("出現トレンド（折れ線グラフ）", isOn: $showAnalysisTrendChart)
+                    Toggle("最優秀/要改善パターン（カード）", isOn: $showAnalysisBestWorstCards)
+                    Toggle("理由別の平均スコア（棒グラフ）", isOn: $showAnalysisBarChart)
+                    Toggle("理由統計データ（リスト）", isOn: $showAnalysisStatsList)
+                }
+            }
+            .navigationTitle("分析画面のカスタマイズ")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("保存") {
+                        dismiss()
+                    }
+                }
+            }
+        }
     }
 }
 

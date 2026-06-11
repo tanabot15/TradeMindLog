@@ -38,6 +38,12 @@ struct AnalysisView: View {
     @AppStorage("customBuyReasons") private var customBuyReasons: [String] = []
     @AppStorage("customSellReasons") private var customSellReasons: [String] = []
     
+    @AppStorage("showAnalysisPieChart") private var showAnalysisPieChart = true
+    @AppStorage("showAnalysisTrendChart") private var showAnalysisTrendChart = true
+    @AppStorage("showAnalysisBestWorstCards") private var showAnalysisBestWorstCards = true
+    @AppStorage("showAnalysisBarChart") private var showAnalysisBarChart = true
+    @AppStorage("showAnalysisStatsList") private var showAnalysisStatsList = true
+    
     @State private var isShowingFilterSheet = false
     @State private var selectedBuyFilters: Set<BuyReason> = []
     @State private var selectedSellFilters: Set<SellReason> = []
@@ -216,9 +222,9 @@ struct AnalysisView: View {
         
         let activeReasons = aggregatedData.filter { $0.count > 0 }
         
-        for stat in aggregatedData {
+        for stat in activeReasons {
             reasonColors[stat.reasonName] = stat.themeColor
-            trendCounts[stat.reasonName] = [:]
+            trendCounts[stat.reasonName] = [Int:Int]()
         }
         
         for record in filteredRecords {
@@ -227,7 +233,10 @@ struct AnalysisView: View {
             
             for name in reasons {
                 if trendCounts[name] != nil {
-                    trendCounts[name, default: [:]][info.sortValue, default: 0] += 1
+                    var timeCounts = trendCounts[name] ?? [:]
+                    let currentCount = timeCounts[info.sortValue] ?? 0
+                    timeCounts[info.sortValue] = currentCount + 1
+                    trendCounts[name] = timeCounts
                 }
             }
         }
@@ -235,17 +244,22 @@ struct AnalysisView: View {
         var result: [ReasonTrendData] = []
         let sortedTimeKeys = activeTimePoints.keys.sorted()
         
-        for name in trendCounts.keys {
-            let color = reasonColors[name] ?? .gray
+        for stat in activeReasons {
+            let name = stat.reasonName
+            let color = stat.themeColor
+            
+            var runningTotal = 0
+            
             for timeKey in sortedTimeKeys {
                 let count = trendCounts[name]?[timeKey] ?? 0
+                runningTotal += count
                 let label = activeTimePoints[timeKey] ?? ""
                 
                 result.append(ReasonTrendData(
                     timeLabel: label,
                     sortValue: timeKey,
                     reasonName: name,
-                    count: count,
+                    count: runningTotal,
                     themeColor: color
                 ))
             }
@@ -292,15 +306,25 @@ struct AnalysisView: View {
                 } else {
                     ScrollView {
                         VStack(spacing: 10) {
-                            pieChartSection
+                            if showAnalysisPieChart {
+                                pieChartSection
+                            }
                             
-                            trendChartSection
+                            if showAnalysisTrendChart {
+                                trendChartSection
+                            }
                             
-                            bestWorstCardsSection
+                            if showAnalysisBestWorstCards {
+                                bestWorstCardsSection
+                            }
                             
-                            barChartSection
+                            if showAnalysisBarChart {
+                                barChartSection
+                            }
                             
-                            statsListSection
+                            if showAnalysisStatsList {
+                                statsListSection
+                            }
                         }
                         .padding()
                     }
@@ -407,14 +431,15 @@ struct AnalysisView: View {
                 Chart(trendData) { trend in
                     LineMark(
                         x: .value("時間", trend.timeLabel),
-                        y: .value("件数", trend.count)
+                        y: .value("件数", trend.count),
+                        series: .value("理由", trend.reasonName)
                     )
                     .foregroundStyle(trend.themeColor)
                     .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
                     
                     PointMark(
                         x: .value("時間", trend.timeLabel),
-                        y: .value("件数", trend.count)
+                        y: .value("件数", trend.count),
                     )
                     .foregroundStyle(trend.themeColor)
                 }
