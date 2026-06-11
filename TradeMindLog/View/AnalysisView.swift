@@ -20,6 +20,15 @@ struct ReasonAnalyticsData: Identifiable {
     let themeColor: Color
 }
 
+struct ReasonTrendData: Identifiable {
+    let id = UUID()
+    let timeLabel: String
+    let sortValue: Int
+    let reasonName: String
+    let count: Int
+    let themeColor: Color
+}
+
 struct AnalysisView: View {
     @Query var records: [Record]
     
@@ -34,6 +43,7 @@ struct AnalysisView: View {
     @State private var selectedSellFilters: Set<SellReason> = []
     @State private var isAndFilterMode = false
     
+    // MARK: - Caluculate, Data Logic
     private var isCompletelyEmptyForSituation: Bool {
         !records.contains { $0.situation == selectedSituation }
     }
@@ -164,6 +174,99 @@ struct AnalysisView: View {
         }
     }
     
+    private var trendData: [ReasonTrendData] {
+        let calendar = Calendar.current
+        let now = Date()
+        
+        func timeInfo(for record: Record) -> (sortValue: Int, label: String) {
+            let date = (record.situation == .buy ? record.buyDate : record.sellDate) ?? .now
+            switch selectedTimeFilter {
+            case .all:
+                let year = calendar.component(.year, from: date)
+                return (year, "\(year)年")
+            case .thisYear:
+                let month = calendar.component(.month, from: date)
+                return (month, "\(month)月")
+            case .thisMonth:
+                let day = calendar.component(.day, from: date)
+                return (day, "\(day)日")
+            }
+        }
+        
+        var activeTimePoints: [Int: String] = [:]
+        
+        switch selectedTimeFilter {
+        case .all:
+            break
+        case .thisYear:
+            for m in 1...12 { activeTimePoints[m] = "\(m)月" }
+        case .thisMonth:
+            if let range = calendar.range(of: .day, in: .month, for: now) {
+                for d in range { activeTimePoints[d] = "\(d)日" }
+            }
+        }
+        
+        for record in filteredRecords {
+            let info = timeInfo(for: record)
+            activeTimePoints[info.sortValue] = info.label
+        }
+        
+        var trendCounts: [String: [Int: Int]] = [:]
+        var reasonColors: [String: Color] = [:]
+        
+        let activeReasons = aggregatedData.filter { $0.count > 0 }
+        
+        for stat in aggregatedData {
+            reasonColors[stat.reasonName] = stat.themeColor
+            trendCounts[stat.reasonName] = [:]
+        }
+        
+        for record in filteredRecords {
+            let info = timeInfo(for: record)
+            let reasons = selectedSituation == .buy ? record.buyReasons.map { $0.localizedName(customNames: customBuyReasons) } : record.sellReasons.map { $0.localizedName(customNames: customSellReasons) }
+            
+            for name in reasons {
+                if trendCounts[name] != nil {
+                    trendCounts[name, default: [:]][info.sortValue, default: 0] += 1
+                }
+            }
+        }
+        
+        var result: [ReasonTrendData] = []
+        let sortedTimeKeys = activeTimePoints.keys.sorted()
+        
+        for name in trendCounts.keys {
+            let color = reasonColors[name] ?? .gray
+            for timeKey in sortedTimeKeys {
+                let count = trendCounts[name]?[timeKey] ?? 0
+                let label = activeTimePoints[timeKey] ?? ""
+                
+                result.append(ReasonTrendData(
+                    timeLabel: label,
+                    sortValue: timeKey,
+                    reasonName: name,
+                    count: count,
+                    themeColor: color
+                ))
+            }
+        }
+        
+        return result.sorted { $0.sortValue < $1.sortValue }
+    }
+    
+    private var activeTrendReasons: [(name: String, color: Color)] {
+        var seen = Set<String>()
+        var list: [(name: String, color: Color)] = []
+        for trend in trendData {
+            if !seen.contains(trend.reasonName) && trend.count > 0 {
+                seen.insert(trend.reasonName)
+                list.append((name: trend.reasonName, color: trend.themeColor))
+            }
+        }
+        
+        return list
+    }
+    
     var bestReason: ReasonAnalyticsData? {
         let rated = scoreSortedStat.filter { $0.averageRating > 0 }
         return rated.first
@@ -190,6 +293,8 @@ struct AnalysisView: View {
                     ScrollView {
                         VStack(spacing: 10) {
                             pieChartSection
+                            
+                            trendChartSection
                             
                             bestWorstCardsSection
                             
@@ -284,6 +389,66 @@ struct AnalysisView: View {
         .cornerRadius(12)
     }
     
+    // Trend Chart Section
+    @ViewBuilder
+    private var trendChartSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("\(selectedSituation.rawValue)理由の出現トレンド")
+                .font(.subheadline)
+                .fontWeight(.bold)
+                .foregroundStyle(.primary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            if filteredRecords.isEmpty {
+                Text("データがありません")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } else {
+                Chart(trendData) { trend in
+                    LineMark(
+                        x: .value("時間", trend.timeLabel),
+                        y: .value("件数", trend.count)
+                    )
+                    .foregroundStyle(trend.themeColor)
+                    .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
+                    
+                    PointMark(
+                        x: .value("時間", trend.timeLabel),
+                        y: .value("件数", trend.count)
+                    )
+                    .foregroundStyle(trend.themeColor)
+                }
+                .frame(height: 200)
+                .chartYAxis {
+                    AxisMarks(values: .automatic(desiredCount: 4))
+                }
+                .overlay(alignment: .topLeading) {
+                    if !activeTrendReasons.isEmpty {
+                        VStack(alignment: .leading, spacing: 5) {
+                            ForEach(activeTrendReasons, id: \.name) { reason in
+                                HStack(spacing: 6) {
+                                    Circle()
+                                        .fill(reason.color)
+                                        .frame(width: 6, height: 6)
+                                    Text(reason.name)
+                                        .font(.system(size: 9, weight: .medium))
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                        .padding(8)
+                        .background(Color(.secondarySystemBackground).opacity(0.85))
+                        .cornerRadius(6)
+                        .padding([.top, .leading], 8)
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(12)
+    }
+    
     // Cards Section
     @ViewBuilder
     private var bestWorstCardsSection: some View {
@@ -372,7 +537,7 @@ struct AnalysisView: View {
     @ViewBuilder
     private var barChartSection: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("理由別の平均スコア")
+            Text("\(selectedSituation.rawValue)理由別の平均スコア")
                 .font(.subheadline)
                 .fontWeight(.bold)
             
@@ -407,7 +572,7 @@ struct AnalysisView: View {
     @ViewBuilder
     private var statsListSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("統計データ")
+            Text("\(selectedSituation.rawValue)理由統計データ")
                 .font(.subheadline)
                 .fontWeight(.bold)
             
@@ -570,7 +735,7 @@ struct AnalysisView: View {
 }
 
 #Preview {
-    AnalysisView(selectedSituation: .constant(.buy), selectedTimeFilter: .constant(.all))
+    AnalysisView(selectedSituation: .constant(.buy), selectedTimeFilter: .constant(.thisYear))
         .modelContainer(previewContainer)
 //        .preferredColorScheme(.dark)
 }
