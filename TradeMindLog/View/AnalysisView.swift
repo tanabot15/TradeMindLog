@@ -38,6 +38,7 @@ struct AnalysisView: View {
     @AppStorage("customBuyReasons") private var customBuyReasons: [String] = []
     @AppStorage("customSellReasons") private var customSellReasons: [String] = []
     
+    @AppStorage("analysisPartOrder") private var analysisPartOrder: [String] = ["pie", "trend", "cards", "bar", "list"]
     @AppStorage("showAnalysisPieChart") private var showAnalysisPieChart = true
     @AppStorage("showAnalysisTrendChart") private var showAnalysisTrendChart = true
     @AppStorage("showAnalysisBestWorstCards") private var showAnalysisBestWorstCards = true
@@ -306,24 +307,21 @@ struct AnalysisView: View {
                 } else {
                     ScrollView {
                         VStack(spacing: 10) {
-                            if showAnalysisPieChart {
-                                pieChartSection
-                            }
-                            
-                            if showAnalysisTrendChart {
-                                trendChartSection
-                            }
-                            
-                            if showAnalysisBestWorstCards {
-                                bestWorstCardsSection
-                            }
-                            
-                            if showAnalysisBarChart {
-                                barChartSection
-                            }
-                            
-                            if showAnalysisStatsList {
-                                statsListSection
+                            ForEach(analysisPartOrder, id: \.self) { partKey in
+                                switch partKey {
+                                case "pie":
+                                    if showAnalysisPieChart { pieChartSection }
+                                case "trend":
+                                    if showAnalysisTrendChart { trendChartSection }
+                                case "cards":
+                                    if showAnalysisBestWorstCards { bestWorstCardsSection }
+                                case "bar":
+                                    if showAnalysisBarChart { barChartSection }
+                                case "list":
+                                    if showAnalysisStatsList { statsListSection }
+                                default:
+                                    EmptyView()
+                                }
                             }
                         }
                         .padding()

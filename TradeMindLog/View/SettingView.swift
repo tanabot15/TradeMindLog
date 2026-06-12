@@ -9,6 +9,26 @@ import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
 
+enum AnalysisPart: String, CaseIterable, Identifiable {
+    case pie = "pie"
+    case trend = "trend"
+    case cards = "cards"
+    case bar = "bar"
+    case list = "list"
+    
+    var id: String { self.rawValue }
+    
+    var localizedName: String {
+        switch self {
+        case .pie: return "理由の比率（円グラフ）"
+        case .trend: return "出現トレンド（折れ線グラフ）"
+        case .cards: return "最優秀/要改善パターン（カード）"
+        case .bar: return "理由別の平均スコア（棒グラフ）"
+        case .list: return "理由統計データ（リスト）"
+        }
+    }
+}
+
 struct SettingView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Record.tickerCode, order: .forward) private var records: [Record]
@@ -32,6 +52,7 @@ struct SettingView: View {
     
     @AppStorage("showReflectionBanner") private var showReflectionBanner = true
     
+    @AppStorage("analysisPartOrder") private var analysisPartOrder: [String] = ["pie", "trend", "cards", "bar", "list"]
     @AppStorage("showAnalysisPieChart") private var showAnalysisPieChart = true
     @AppStorage("showAnalysisTrendChart") private var showAnalysisTrendChart = true
     @AppStorage("showAnalysisBestWorstCards") private var showAnalysisBestWorstCards = true
@@ -70,7 +91,8 @@ struct SettingView: View {
                     showAnalysisTrendChart: $showAnalysisTrendChart,
                     showAnalysisBestWorstCards: $showAnalysisBestWorstCards,
                     showAnalysisBarChart: $showAnalysisBarChart,
-                    showAnalysisStatsList: $showAnalysisStatsList
+                    showAnalysisStatsList: $showAnalysisStatsList,
+                    analysisPartOrder: $analysisPartOrder
                 )
             }
             .fileExporter(
@@ -231,7 +253,7 @@ private extension SettingView {
                 Text("Version")
                 Spacer()
                 // change when updating
-                Text("3.8")
+                Text("3.9")
                     .foregroundStyle(.secondary)
             }
             
@@ -403,28 +425,58 @@ struct AnalysisDisplayEditSheetView: View {
     @Binding var showAnalysisBestWorstCards: Bool
     @Binding var showAnalysisBarChart: Bool
     @Binding var showAnalysisStatsList: Bool
+    @Binding var analysisPartOrder: [String]
+    
+    @State private var localOrder: [AnalysisPart] = []
     
     var body: some View {
         NavigationStack {
-            Form {
-                Section(header: Text("表示・非表示の切り替え")) {
-                    Toggle("理由の比率（円グラフ）", isOn: $showAnalysisPieChart)
-                    Toggle("出現トレンド（折れ線グラフ）", isOn: $showAnalysisTrendChart)
-                    Toggle("最優秀/要改善パターン（カード）", isOn: $showAnalysisBestWorstCards)
-                    Toggle("理由別の平均スコア（棒グラフ）", isOn: $showAnalysisBarChart)
-                    Toggle("理由統計データ（リスト）", isOn: $showAnalysisStatsList)
+            List {
+                Section(header: Text("分析画面の編集"), footer: Text("並び順は完了ボタンを押したタイミングで反映されます。")) {
+                    ForEach(localOrder) { part in
+                        HStack {
+                            Toggle(part.localizedName, isOn: binding(for: part))
+                                .toggleStyle(SwitchToggleStyle(tint: .blue))
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .onMove(perform: movePart)
                 }
             }
             .navigationTitle("分析画面のカスタマイズ")
             .navigationBarTitleDisplayMode(.inline)
+            .environment(\.editMode, .constant(.active))
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("保存") {
+                    Button("完了") {
+                        analysisPartOrder = localOrder.map { $0.rawValue }
                         dismiss()
                     }
                 }
             }
+            .onAppear {
+                localOrder = analysisPartOrder.compactMap { AnalysisPart(rawValue: $0) }
+                for part in AnalysisPart.allCases {
+                    if !localOrder.contains(part) {
+                        localOrder.append(part)
+                    }
+                }
+            }
         }
+    }
+    
+    private func binding(for part: AnalysisPart) -> Binding<Bool> {
+        switch part {
+        case .pie: return $showAnalysisPieChart
+        case .trend: return $showAnalysisTrendChart
+        case .cards: return $showAnalysisBestWorstCards
+        case .bar: return $showAnalysisBarChart
+        case .list: return $showAnalysisStatsList
+        }
+    }
+    
+    private func movePart(from source: IndexSet, to destination: Int) {
+        localOrder.move(fromOffsets: source, toOffset: destination)
     }
 }
 
