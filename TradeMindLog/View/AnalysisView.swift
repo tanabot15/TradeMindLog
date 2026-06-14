@@ -245,15 +245,37 @@ struct AnalysisView: View {
         var result: [ReasonTrendData] = []
         let sortedTimeKeys = activeTimePoints.keys.sorted()
         
+        let currentCalendar = Calendar.current
+        let currentYear = currentCalendar.component(.year, from: now)
+        let currentMonth = currentCalendar.component(.month, from: now)
+        let currentDay = currentCalendar.component(.day, from: now)
+        
+        let todayKey: Int
+        if let firstKey = sortedTimeKeys.first {
+            if firstKey > 20000000 {
+                todayKey = currentYear * 10000 + currentMonth * 100 + currentDay
+            } else if firstKey > 200000 {
+                todayKey = currentYear * 100 + currentMonth
+            } else {
+                todayKey = currentYear
+            }
+        } else {
+            todayKey = Int.max
+        }
+        
         for stat in activeReasons {
             let name = stat.reasonName
             let color = stat.themeColor
-            
             var runningTotal = 0
             
             for timeKey in sortedTimeKeys {
+                if timeKey > todayKey {
+                    continue
+                }
+                
                 let count = trendCounts[name]?[timeKey] ?? 0
                 runningTotal += count
+                
                 let label = activeTimePoints[timeKey] ?? ""
                 
                 result.append(ReasonTrendData(

@@ -253,7 +253,7 @@ private extension SettingView {
                 Text("Version")
                 Spacer()
                 // change when updating
-                Text("3.9")
+                Text("3.10")
                     .foregroundStyle(.secondary)
             }
             
@@ -429,6 +429,8 @@ struct AnalysisDisplayEditSheetView: View {
     
     @State private var localOrder: [AnalysisPart] = []
     
+    @State private var isShowingResetAlert = false
+    
     var body: some View {
         NavigationStack {
             List {
@@ -441,6 +443,14 @@ struct AnalysisDisplayEditSheetView: View {
                         .contentShape(Rectangle())
                     }
                     .onMove(perform: movePart)
+                }
+                
+                Section {
+                    Button(role: .destructive) {
+                        isShowingResetAlert = true
+                    } label: {
+                        Text("表示設定を初期値に戻す")
+                    }
                 }
             }
             .navigationTitle("分析画面のカスタマイズ")
@@ -455,12 +465,15 @@ struct AnalysisDisplayEditSheetView: View {
                 }
             }
             .onAppear {
-                localOrder = analysisPartOrder.compactMap { AnalysisPart(rawValue: $0) }
-                for part in AnalysisPart.allCases {
-                    if !localOrder.contains(part) {
-                        localOrder.append(part)
-                    }
+                loadCurrentOrder()
+            }
+            .alert("表示設定を初期値に戻しますか？", isPresented: $isShowingResetAlert) {
+                Button("キャンセル", role: .cancel) { }
+                Button("初期値に戻す", role: .destructive) {
+                    resetToDefaultSettings()
                 }
+            } message: {
+                Text("分析画面のグラフの表示順序と表示・非表示の状態が最初の状態に戻ります")
             }
         }
     }
@@ -477,6 +490,28 @@ struct AnalysisDisplayEditSheetView: View {
     
     private func movePart(from source: IndexSet, to destination: Int) {
         localOrder.move(fromOffsets: source, toOffset: destination)
+    }
+    
+    private func loadCurrentOrder() {
+        localOrder = analysisPartOrder.compactMap { AnalysisPart(rawValue: $0) }
+        for part in AnalysisPart.allCases {
+            if !localOrder.contains(part) {
+                localOrder.append(part)
+            }
+        }
+    }
+    
+    private func resetToDefaultSettings() {
+        showAnalysisPieChart = true
+        showAnalysisTrendChart = true
+        showAnalysisBestWorstCards = true
+        showAnalysisBarChart = true
+        showAnalysisStatsList = true
+        
+        let defaultOrder = ["pie", "trend", "cards", "bar", "list"]
+        analysisPartOrder = defaultOrder
+        
+        localOrder = defaultOrder.compactMap { AnalysisPart(rawValue: $0) }
     }
 }
 
