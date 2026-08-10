@@ -60,3 +60,37 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Xcode
+build/
+DerivedData/
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+
+# Personal Settings (Breakpoints, UI State, etc.)
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Swift Package Manager (SPM) Build and Checkout Artifacts
+.build/
+.swiftpm/
+
+# SwiftData / Core Data model caching, etc.
+*.indexed-sqlite
+*.indexed-sqlite-journal
+
+# AdMob Credentials（if needed）
+**/AdMobConfig.plist
