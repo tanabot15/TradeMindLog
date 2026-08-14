@@ -14,7 +14,7 @@ struct TradeMindLogApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainTabView()
                 .preferredColorScheme(
                     colorScheme == 1 ? .light :
                     colorScheme == 2 ? .dark : nil
