@@ -8,7 +8,7 @@
 import SwiftUI
 import SwiftData
 
-struct ContentView: View {
+struct MainTabView: View {
     @State private var sharedSituation: Situation = .buy
     @State private var sharedTimeFilter: TimeFilter = .all
     
@@ -47,7 +47,7 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    MainTabView()
         .modelContainer(previewContainer)
 //        .preferredColorScheme(.dark)
 }
