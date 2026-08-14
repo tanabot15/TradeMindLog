@@ -10,6 +10,8 @@
 		D959708C2FC93AC8000EB2D3 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D959708B2FC93AC8000EB2D3 /* EmptyStateView.swift */; };
 		D95970902FD14FED000EB2D3 /* ReasonDetailListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D959708F2FD14FED000EB2D3 /* ReasonDetailListView.swift */; };
 		D95970922FD23BFB000EB2D3 /* ReasonTagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95970912FD23BFB000EB2D3 /* ReasonTagsView.swift */; };
+		D990D156302F704E001B3CDA /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = D990D155302F704E001B3CDA /* GoogleMobileAds */; };
+		D990D159302F709C001B3CDA /* AdMobConfig.plist in Resources */ = {isa = PBXBuildFile; fileRef = D990D158302F709C001B3CDA /* AdMobConfig.plist */; };
 		D9A9394B2FC0264A00D3DFF3 /* SettingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9A9394A2FC0264A00D3DFF3 /* SettingViewModel.swift */; };
 		D9BBBAA32FB4A26600E05A0C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D9BBBA9F2FB4A26600E05A0C /* Assets.xcassets */; };
 		D9BBBAA42FB4A26600E05A0C /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9BBBAA02FB4A26600E05A0C /* MainTabView.swift */; };
@@ -28,6 +30,8 @@
 		D959708B2FC93AC8000EB2D3 /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		D959708F2FD14FED000EB2D3 /* ReasonDetailListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReasonDetailListView.swift; sourceTree = "<group>"; };
 		D95970912FD23BFB000EB2D3 /* ReasonTagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReasonTagsView.swift; sourceTree = "<group>"; };
+		D990D158302F709C001B3CDA /* AdMobConfig.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = AdMobConfig.plist; sourceTree = "<group>"; };
+		D990D15A302F7122001B3CDA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		D9A9394A2FC0264A00D3DFF3 /* SettingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingViewModel.swift; sourceTree = "<group>"; };
 		D9BBBA912FB4A25400E05A0C /* TradeMindLog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TradeMindLog.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D9BBBA9F2FB4A26600E05A0C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -48,6 +52,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D990D156302F704E001B3CDA /* GoogleMobileAds in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -90,6 +95,15 @@
 			path = Component;
 			sourceTree = "<group>";
 		};
+		D990D157302F707E001B3CDA /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				D9BBBA9F2FB4A26600E05A0C /* Assets.xcassets */,
+				D990D158302F709C001B3CDA /* AdMobConfig.plist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		D9BBBA882FB4A25400E05A0C = {
 			isa = PBXGroup;
 			children = (
@@ -109,10 +123,11 @@
 		D9BBBAA22FB4A26600E05A0C /* TradeMindLog */ = {
 			isa = PBXGroup;
 			children = (
+				D990D15A302F7122001B3CDA /* Info.plist */,
 				D9BBBAA12FB4A26600E05A0C /* TradeMindLogApp.swift */,
 				D9BBBAA62FB4A3B800E05A0C /* Model */,
 				D9BBBAA72FB4A3C400E05A0C /* View */,
-				D9BBBA9F2FB4A26600E05A0C /* Assets.xcassets */,
+				D990D157302F707E001B3CDA /* Resources */,
 			);
 			path = TradeMindLog;
 			sourceTree = "<group>";
@@ -157,6 +172,7 @@
 			);
 			name = TradeMindLog;
 			packageProductDependencies = (
+				D990D155302F704E001B3CDA /* GoogleMobileAds */,
 			);
 			productName = TradeMindLog;
 			productReference = D9BBBA912FB4A25400E05A0C /* TradeMindLog.app */;
@@ -187,6 +203,9 @@
 			);
 			mainGroup = D9BBBA882FB4A25400E05A0C;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				D990D154302F704E001B3CDA /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D9BBBA922FB4A25400E05A0C /* Products */;
 			projectDirPath = "";
@@ -202,6 +221,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D990D159302F709C001B3CDA /* AdMobConfig.plist in Resources */,
 				D9BBBAA32FB4A26600E05A0C /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -368,8 +388,10 @@
 				DEVELOPMENT_TEAM = D86GFNUD35;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TradeMindLog/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = TradeMindLog;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "This identifier will be used to deliver personalized ads to you.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -407,8 +429,10 @@
 				DEVELOPMENT_TEAM = D86GFNUD35;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TradeMindLog/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = TradeMindLog;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "This identifier will be used to deliver personalized ads to you.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -458,6 +482,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		D990D154302F704E001B3CDA /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 13.7.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D990D155302F704E001B3CDA /* GoogleMobileAds */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D990D154302F704E001B3CDA /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
+			productName = GoogleMobileAds;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D9BBBA892FB4A25400E05A0C /* Project object */;
 }
