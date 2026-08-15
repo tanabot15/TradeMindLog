@@ -6,13 +6,27 @@
 //
 
 import SwiftUI
+import GoogleMobileAds
 
-struct BannerAdView: View {
-    var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+struct BannerAdView: UIViewRepresentable {
+    let adUnitID: String
+
+    func makeUIView(context: Context) -> BannerView {
+        let banner = BannerView(adSize: AdSizeBanner)
+        banner.adUnitID = adUnitID
+        
+        if let rootViewController = AdMobManager.shared.getRootViewController() {
+            banner.rootViewController = rootViewController
+        }
+        
+        banner.load(Request())
+        return banner
     }
+
+    func updateUIView(_ uiView: BannerView, context: Context) {}
 }
 
 #Preview {
-    BannerAdView()
+    BannerAdView(adUnitID: AdMobManager.shared.bannerAdUnitID)
+        .frame(height: 50)
 }

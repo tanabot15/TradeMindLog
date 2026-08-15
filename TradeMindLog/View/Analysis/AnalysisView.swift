@@ -50,6 +50,8 @@ struct AnalysisView: View {
     @State private var selectedSellFilters: Set<SellReason> = []
     @State private var isAndFilterMode = false
     
+    @StateObject private var adManager = AdMobManager.shared
+    
     // MARK: - Caluculate, Data Logic
     private var isCompletelyEmptyForSituation: Bool {
         !records.contains { $0.situation == selectedSituation }
@@ -316,37 +318,43 @@ struct AnalysisView: View {
     
     // MARK: - Main View
     var body: some View {
-        NavigationStack {            
+        NavigationStack {
             VStack(spacing: 12) {
-                if isCompletelyEmptyForSituation {
-                    Spacer()
-                    EmptyStateView(type: .completelyEmpty, situation: selectedSituation)
-                    Spacer()
-                } else if filteredRecords.isEmpty {
-                    Spacer()
-                    EmptyStateView(type: .filterEmpty(timeFilterText: selectedTimeFilter.rawValue), situation: selectedSituation)
-                    Spacer()
-                } else {
-                    ScrollView {
-                        VStack(spacing: 10) {
-                            ForEach(analysisPartOrder, id: \.self) { partKey in
-                                switch partKey {
-                                case "pie":
-                                    if showAnalysisPieChart { pieChartSection }
-                                case "trend":
-                                    if showAnalysisTrendChart { trendChartSection }
-                                case "cards":
-                                    if showAnalysisBestWorstCards { bestWorstCardsSection }
-                                case "bar":
-                                    if showAnalysisBarChart { barChartSection }
-                                case "list":
-                                    if showAnalysisStatsList { statsListSection }
-                                default:
-                                    EmptyView()
+                BannerAdView(adUnitID: adManager.bannerAdUnitID)
+                    .frame(height: 50)
+                    .background(Color(.systemBackground))
+                
+                VStack(spacing: 12) {
+                    if isCompletelyEmptyForSituation {
+                        Spacer()
+                        EmptyStateView(type: .completelyEmpty, situation: selectedSituation)
+                        Spacer()
+                    } else if filteredRecords.isEmpty {
+                        Spacer()
+                        EmptyStateView(type: .filterEmpty(timeFilterText: selectedTimeFilter.rawValue), situation: selectedSituation)
+                        Spacer()
+                    } else {
+                        ScrollView {
+                            VStack(spacing: 10) {
+                                ForEach(analysisPartOrder, id: \.self) { partKey in
+                                    switch partKey {
+                                    case "pie":
+                                        if showAnalysisPieChart { pieChartSection }
+                                    case "trend":
+                                        if showAnalysisTrendChart { trendChartSection }
+                                    case "cards":
+                                        if showAnalysisBestWorstCards { bestWorstCardsSection }
+                                    case "bar":
+                                        if showAnalysisBarChart { barChartSection }
+                                    case "list":
+                                        if showAnalysisStatsList { statsListSection }
+                                    default:
+                                        EmptyView()
+                                    }
                                 }
                             }
+                            .padding()
                         }
-                        .padding()
                     }
                 }
             }

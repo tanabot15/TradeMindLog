@@ -29,6 +29,8 @@ struct ListView: View {
     @State private var selectedSellFilters: Set<SellReason> = []
     @State private var isAndFilterMode = false
     
+    @StateObject private var adManager = AdMobManager.shared
+    
     private var isCompletelyEmptyForSituation: Bool {
         !records.contains { $0.situation == selectedSituation }
     }
@@ -103,31 +105,37 @@ struct ListView: View {
     // MARK: - Main View
     var body: some View {
         NavigationStack {
-            ZStack {
-                if isCompletelyEmptyForSituation {
-                    VStack {
-                        Spacer()
-                        EmptyStateView(type: .completelyEmpty, situation: selectedSituation) {
-                            createNewRecord()
-                        }
-                        Spacer()
-                    }
-                } else if currentSituationRecords.isEmpty {
-                    VStack {
-                        Spacer()
-                        EmptyStateView(type: .filterEmpty(timeFilterText: selectedTimeFilter.rawValue), situation: selectedSituation)
-                        Spacer()
-                    }
-                } else {
-                    VStack(spacing: 0) {
-                        notificationBannerView
-                        recordListView(for: filteredRecords)
-                    }
-                }
+            VStack(spacing: 12) {
+                BannerAdView(adUnitID: adManager.bannerAdUnitID)
+                    .frame(height: 50)
+                    .background(Color(.systemBackground))
                 
-                VStack {
-                    Spacer()
-                    bottomAddRecordButton
+                ZStack {
+                    if isCompletelyEmptyForSituation {
+                        VStack {
+                            Spacer()
+                            EmptyStateView(type: .completelyEmpty, situation: selectedSituation) {
+                                createNewRecord()
+                            }
+                            Spacer()
+                        }
+                    } else if currentSituationRecords.isEmpty {
+                        VStack {
+                            Spacer()
+                            EmptyStateView(type: .filterEmpty(timeFilterText: selectedTimeFilter.rawValue), situation: selectedSituation)
+                            Spacer()
+                        }
+                    } else {
+                        VStack(spacing: 0) {
+                            notificationBannerView
+                            recordListView(for: filteredRecords)
+                        }
+                    }
+                    
+                    VStack {
+                        Spacer()
+                        bottomAddRecordButton
+                    }
                 }
             }
             .scrollContentBackground(.hidden)

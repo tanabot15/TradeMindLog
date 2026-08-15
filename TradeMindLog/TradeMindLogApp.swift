@@ -7,10 +7,16 @@
 
 import SwiftUI
 import SwiftData
+import GoogleMobileAds
 
 @main
 struct TradeMindLogApp: App {
     @AppStorage("colorScheme") var colorScheme = 0
+    
+    init() {
+        // Initialize the Mobile Ads SDK
+        MobileAds.shared.start(completionHandler: nil)
+    }
     
     var body: some Scene {
         WindowGroup {
