@@ -11,9 +11,9 @@
 		D95970902FD14FED000EB2D3 /* ReasonDetailListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D959708F2FD14FED000EB2D3 /* ReasonDetailListView.swift */; };
 		D95970922FD23BFB000EB2D3 /* ReasonTagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95970912FD23BFB000EB2D3 /* ReasonTagsView.swift */; };
 		D990D156302F704E001B3CDA /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = D990D155302F704E001B3CDA /* GoogleMobileAds */; };
-		D990D159302F709C001B3CDA /* AdMobConfig.plist in Resources */ = {isa = PBXBuildFile; fileRef = D990D158302F709C001B3CDA /* AdMobConfig.plist */; };
 		D990D15D302F71CE001B3CDA /* AdMobManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D990D15C302F71CE001B3CDA /* AdMobManager.swift */; };
 		D990D15F302F722B001B3CDA /* BannerAdView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D990D15E302F722B001B3CDA /* BannerAdView.swift */; };
+		D990D1603030866C001B3CDA /* AdMobConfig.plist in Resources */ = {isa = PBXBuildFile; fileRef = D990D158302F709C001B3CDA /* AdMobConfig.plist */; };
 		D9A9394B2FC0264A00D3DFF3 /* SettingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9A9394A2FC0264A00D3DFF3 /* SettingViewModel.swift */; };
 		D9BBBAA32FB4A26600E05A0C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D9BBBA9F2FB4A26600E05A0C /* Assets.xcassets */; };
 		D9BBBAA42FB4A26600E05A0C /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9BBBAA02FB4A26600E05A0C /* MainTabView.swift */; };
@@ -235,8 +235,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D990D159302F709C001B3CDA /* AdMobConfig.plist in Resources */,
 				D9BBBAA32FB4A26600E05A0C /* Assets.xcassets in Resources */,
+				D990D1603030866C001B3CDA /* AdMobConfig.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -400,7 +400,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 32;
+				CURRENT_PROJECT_VERSION = 34;
 				DEVELOPMENT_TEAM = D86GFNUD35;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -418,7 +418,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 4.0;
+				MARKETING_VERSION = 4.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.suzuki.kenichiro.TradeMindLog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -441,7 +441,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 32;
+				CURRENT_PROJECT_VERSION = 34;
 				DEVELOPMENT_TEAM = D86GFNUD35;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -459,7 +459,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 4.0;
+				MARKETING_VERSION = 4.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.suzuki.kenichiro.TradeMindLog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
